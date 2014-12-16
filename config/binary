@@ -10,7 +10,7 @@ LB_APT_INDICES="true"
 
 # $LB_BOOTAPPEND_LIVE: set boot parameters
 # (Default: empty)
-LB_BOOTAPPEND_LIVE="boot=live components quiet splash"
+LB_BOOTAPPEND_LIVE="boot=live config locales=en_US.UTF-8"
 
 # $LB_BOOTAPPEND_INSTALL: set boot parameters
 # (Default: empty)
@@ -74,16 +74,16 @@ LB_HDD_SIZE="auto"
 LB_ISO_APPLICATION="Debian Live"
 
 # $LB_ISO_PREPARER: set iso preparer
-# (Default: live-build $VERSION; http://live-systems.org/devel/live-build)
-LB_ISO_PREPARER="live-build $VERSION; http://live-systems.org/devel/live-build"
+# (Default: live-build 4.0.3-1; http://live-systems.org/devel/live-build)
+LB_ISO_PREPARER="live-build 4.0.3-1; http://live-systems.org/devel/live-build"
 
 # $LB_ISO_PUBLISHER: set iso publisher
 # (Default: Live Systems project; http://live-systems.org/; debian-live@lists.debian.org)
 LB_ISO_PUBLISHER="Live Systems project; http://live-systems.org/; debian-live@lists.debian.org"
 
 # $LB_ISO_VOLUME: set iso volume (max 32 chars)
-# (Default: Debian jessie $(date +%Y%m%d-%H:%M))
-LB_ISO_VOLUME="Debian jessie $(date +%Y%m%d-%H:%M)"
+# (Default: Debian jessie 20141216-17:51)
+LB_ISO_VOLUME="Debian jessie 20141216-17:51"
 
 # $LB_JFFS2_ERASEBLOCK: set jffs2 eraseblock size
 # (Default: unset)

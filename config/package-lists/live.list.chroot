@@ -5,6 +5,9 @@ task-english
 task-cinnamon-desktop
 vim
 git
-iceweasel
 stress
 debian-installer-launcher
+libxenomai-dev
+linux-patch-xenomai
+libqwt-dev
+libhdf5-dev

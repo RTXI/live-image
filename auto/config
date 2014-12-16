@@ -5,7 +5,6 @@ set -e
 lb config noauto \
    --distribution "jessie" \
    --archive-areas "main contrib non-free"  \
-   --architectures amd64 \
-   --linux-packages "linux-image  linux-headers" \
+   --architecture amd64 \
    --bootappend-live "boot=live config locales=en_US.UTF-8" \
    "${@}"
