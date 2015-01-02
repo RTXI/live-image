@@ -1,3 +1,5 @@
+##DO NOT RUN THIS AS A SCRIPT!!!
+
 git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs3-standalone.git
 
 cd aufs3-standalone.git
