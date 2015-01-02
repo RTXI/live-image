@@ -7,3 +7,12 @@ These build scripts are designed to generate an up-to-date RTXI live image. It's
 
 **Main features:**  
 I'll add this when everything's working.
+
+
+
+**Update (1/2/2014):**
+Aah, the live stuff's going to take a bit to explain...another day.  
+
+Just don't run remaster-script.sh. It's more of a copy/paste line-by-line thing. Running it will only cause you sadness.  
+
+Also, you can't install from the live environment. Reboot and choose "install" or "graphical install" from the menu.  
