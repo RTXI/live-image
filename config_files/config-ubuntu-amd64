@@ -1,0 +1,12 @@
+#! /bin/sh
+
+lb config noauto \
+	--mode ubuntu \
+	--bootstrap-keyring ubuntu-keyring \
+	--architectures amd64 \
+	--distribution trusty \
+	--linux-flavours "amd64" \
+	--bootstrap-keyring ubuntu-keyring \
+	--system live \
+	--archive-areas "main contrib universe" \
+"${@}"
