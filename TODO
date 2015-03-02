@@ -1,0 +1,3 @@
+1. Disable kexec reboots. Go to etc/default/kexec and set to false. 
+2. Add Trolltech.conf file to ~/.config/ directory in Ubuntu. 
+3. Find new hosting option. Dropbox how has a 3 GB limit. 

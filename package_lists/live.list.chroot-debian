@@ -8,6 +8,8 @@ cinnamon-core
 cinnamon-session
 gnome-keyring
 gnome-themes-standard
+xorg
+xinit
 eog
 evince
 gimp
@@ -20,7 +22,10 @@ gnome-screenshot
 gnome-terminal
 bash-completion
 iceweasel
-libreoffice-write
+r-base
+gitk
+hdfview
+libreoffice-writer
 libreoffice-impress
 libreoffice-calc
 openssh-client
@@ -33,12 +38,15 @@ xdg-user-dirs
 cups
 gdebi
 pm-utils
+lynx
+vlc
 vim
 git
 stress
 firmware-linux
 debian-installer
 debian-installer-launcher
+qt4-qtconfig
 qt4-dev-tools
 libqt4-dev
 libqt4-opengl-dev
@@ -57,3 +65,5 @@ libncurses5-dev
 libelf-dev
 binutils-dev
 libgsl0-dev
+mlton
+libmagickwand-dev
