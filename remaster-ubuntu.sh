@@ -139,14 +139,14 @@ exit
 sudo umount edit/dev
 
 # Update files in live/ directory
-sudo bash -c "chroot edit dpkg-query -W --showformat='${Package} ${Version}\n' > extract-cd/casper/filesystem.manifest"
+sudo bash -c "chroot edit dpkg-query -W > extract/casper/filesystem.manifest"
 sudo cp extract/casper/filesystem.manifest extract/casper/filesystem.manifest-desktop
 sudo sed -i '/ubiquity/d' extract/casper/filesystem.manifest-desktop
 sudo sed -i '/casper/d' extract/casper/filesystem.manifest-desktop
 
-sudo cp edit/boot/vmlinuz-3.8.13-xenomai-2.6.3-aufs extract/live/vmlinuz
-sudo cp edit/boot/initrd.img-3.8.13-xenomai-2.6.3-aufs extract/live/initrd.img
-sudo mksquashfs edit extract/live/filesystem.squashfs -comp xz
+sudo cp edit/boot/vmlinuz-3.8.13-xenomai-2.6.3-aufs extract/casper/vmlinuz.efi
+sudo cp edit/boot/initrd.img-3.8.13-xenomai-2.6.3-aufs extract/casper/initrd.lz
+sudo mksquashfs edit extract/casper/filesystem.squashfs -comp xz
 sudo bash -c "printf $(sudo du -sx --block-size=1 edit | cut -f1) > extract/casper/filesystem.size"
 
 cd extract
