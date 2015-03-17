@@ -23,6 +23,7 @@ gnome-terminal
 bash-completion
 iceweasel
 r-base
+lshw
 gitk
 hdfview
 libreoffice-writer
