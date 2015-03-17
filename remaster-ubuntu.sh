@@ -123,13 +123,14 @@ cd ~/
 mkdir .config
 gdebi linux-image*
 gdebi linux-headers*
-./install_rtxi.sh # needs user to enter 1 in prompt
+./install_rtxi.sh # needs user to enter 1 in prompt, also don't use sudo
 
 # Install ggplot
 R
 install.packages("ggplot2") # use mirror 96 if you want
 install.packages("scales")
 install.packages("gridExtra")
+install.packages("plyr")
 q() # "n" - don't save workspace
 
 # Clean environment and exit
