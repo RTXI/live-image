@@ -37,12 +37,13 @@ DEPS=${ROOT}/deps
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
 DYN=${DEPS}/dynamo
-sudo apt-get -y install autotools-dev automake libtool
-sudo apt-get -y install kernel-package
-sudo apt-get -y install fakeroot crash kexec-tools makedumpfile kernel-wedge # Select "No" for kexec handling restarts
-sudo apt-get -y build-dep linux
-sudo apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev
-sudo apt-get -y install qt4-dev-tools libqt4-dev libqt4-opengl-dev
+apt-get -y install autotools-dev automake libtool
+apt-get -y install kernel-package
+apt-get -y install fakeroot crash kexec-tools makedumpfile kernel-wedge # Select "No" for kexec handling restarts
+apt-get -y build-dep linux
+apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev
+apt-get -y install qt4-dev-tools libqt4-dev libqt4-opengl-dev
+apt-get -y install r-base lshw
 
 cd ${DEPS}
 
@@ -132,16 +133,21 @@ install.packages("gridExtra")
 q() # "n" - don't save workspace
 
 # Clean environment and exit
-rm /etc/resolv.conf
+# rm /run/resolvconf/resolv.conf # maybe don't do this...? 
 umount /proc /sys /dev/pts
 exit
 sudo umount edit/dev
 
 # Update files in live/ directory
-sudo bash -c "chroot edit dpkg-query -W  > extract/live/filesystem.packages"
+sudo bash -c "chroot edit dpkg-query -W --showformat='${Package} ${Version}\n' > extract-cd/casper/filesystem.manifest"
+sudo cp extract/casper/filesystem.manifest extract/casper/filesystem.manifest-desktop
+sudo sed -i '/ubiquity/d' extract/casper/filesystem.manifest-desktop
+sudo sed -i '/casper/d' extract/casper/filesystem.manifest-desktop
+
 sudo cp edit/boot/vmlinuz-3.8.13-xenomai-2.6.3-aufs extract/live/vmlinuz
 sudo cp edit/boot/initrd.img-3.8.13-xenomai-2.6.3-aufs extract/live/initrd.img
 sudo mksquashfs edit extract/live/filesystem.squashfs -comp xz
+sudo bash -c "printf $(sudo du -sx --block-size=1 edit | cut -f1) > extract/casper/filesystem.size"
 
 cd extract
 sudo bash -c "find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt"
