@@ -2,8 +2,5 @@
 2. Add Trolltech.conf file to ~/.config/ directory in Ubuntu. 
 3. Find new hosting option. Dropbox how has a 3 GB limit. 
 4. Add 'live-config' to the end of the isolinux.cfg so that the live session will not lock when left idle. 
-5. Fix syslinux config so that the image boots from USB cloned with dd.   
-	- A. Copy the isolinux folder and rename the copy "syslinux"  
-	- B. Rename "isolinux.cfg" to "syslinux.cfg"  
-6. Add .vimrc file to root. This is more for my convenience.  
-7. Leave RTXI folder in /home/ that has global access permissions.  
+5. Add .vimrc file to root. This is more for my convenience.  
+6. Leave RTXI folder in /home/ that has global access permissions.  
