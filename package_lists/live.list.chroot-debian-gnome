@@ -11,6 +11,7 @@ gnome-keyring
 debian-keyring
 gnome-themes-standard
 gnome-backgrounds
+gnome-tweak-tool
 xorg
 xinit
 eog
@@ -27,6 +28,8 @@ bash-completion
 iceweasel
 r-base
 lshw
+meld
+screen
 gitk
 hdfview
 libreoffice-writer
@@ -70,3 +73,7 @@ binutils-dev
 libgsl0-dev
 mlton
 libmagickwand-dev
+devscripts
+debhelper
+dh-kpatches
+findutils

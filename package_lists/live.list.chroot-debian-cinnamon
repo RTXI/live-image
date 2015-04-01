@@ -27,6 +27,8 @@ iceweasel
 r-base
 lshw
 gitk
+screen
+meld
 hdfview
 libreoffice-writer
 libreoffice-impress
@@ -49,7 +51,6 @@ git
 stress
 firmware-linux
 debian-installer
-debian-installer-launcher
 qt4-qtconfig
 qt4-dev-tools
 libqt4-dev
@@ -71,3 +72,7 @@ binutils-dev
 libgsl0-dev
 mlton
 libmagickwand-dev
+devscripts
+debhelper
+dh-kpatches
+findutils

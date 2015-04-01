@@ -4,6 +4,8 @@ live-config-systemd
 lightdm
 unity
 unity-control-center
+gnome-keyring
+ubuntu-keyring
 hud
 indicator-application
 indicator-appmenu
@@ -29,6 +31,9 @@ gnome-terminal
 libreoffice-write
 libreoffice-impress
 libreoffice-calc
+firefox
+lshw
+r-base
 totem
 xdg-user-dirs-gtk
 xdg-user-dirs
@@ -37,8 +42,14 @@ gdebi
 pm-utils
 xdg-utils
 vim
+emacs
 git
+gitk
+meld
+screen
 stress
+openssh-server
+openssh-client
 qt4-dev-tools
 libqt4-dev
 libqt4-opengl-dev
@@ -57,3 +68,9 @@ libncurses5-dev
 libelf-dev
 binutils-dev
 libgsl0-dev
+mlton
+libmagickwand-dev
+devscripts
+debhelper
+dh-kpatches
+findutils
