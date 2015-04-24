@@ -138,6 +138,8 @@ gdebi linux-headers*.deb
 
 # Install RTXI and keep sources in /rtxi/home
 mkdir /home/RTXI
+chown root.adm /home/RTXI
+chmod -R g+w /home/RTXI
 mv ~/rtxi /home/RTXI/
 cd /home/RTXI/rtxi/scripts
 ./install_rtxi.sh # needs user to enter 1 in prompt, also don't use sudo
@@ -177,7 +179,7 @@ sudo cp edit/boot/initrd.img-3.8.13-xenomai-2.6.3-aufs extract/casper/initrd.lz
 sudo mksquashfs edit extract/casper/filesystem.squashfs -comp xz
 sudo bash -c "printf $(sudo du -sx --block-size=1 edit | cut -f1) > extract/casper/filesystem.size"
 
-cd extract
+cd extrac -
 sudo bash -c "find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt"
 
 sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../custom.iso . 
