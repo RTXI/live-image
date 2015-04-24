@@ -1,13 +1,12 @@
 #! /usr/bin/bash
 
-echo "Ubuntu mode...ISN'T DONE SO DON'T USE IT!!!!!"
-exit
+echo "Ubuntu mode..."
 
 # Get started and extract the iso
 mkdir mnt extract
 sudo mount -o loop *iso mnt/
 sudo rsync --exclude=/casper/filesystem.squashfs -a mnt/ extract
-sudo unsquashfs mnt/live/filesystem.squashfs
+sudo unsquashfs mnt/casper/filesystem.squashfs
 mv squashfs-root edit
 sudo umount mnt/
 
@@ -27,7 +26,9 @@ export HOME=/root
 export LC_ALL=C
 
 # Install dependencies
+apt-get -y install vim git
 git clone https://github.com/rtxi/rtxi
+git clone https://github.com/anselg/handy-scripts
 cd rtxi
 git checkout qt4
 cd scripts
@@ -39,11 +40,12 @@ QWT=${DEPS}/qwt
 DYN=${DEPS}/dynamo
 apt-get -y install autotools-dev automake libtool
 apt-get -y install kernel-package
+apt-get -y install g++ gcc gdb
 apt-get -y install fakeroot crash kexec-tools makedumpfile kernel-wedge # Select "No" for kexec handling restarts
 apt-get -y build-dep linux
 apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev
 apt-get -y install qt4-dev-tools libqt4-dev libqt4-opengl-dev
-apt-get -y install r-base lshw
+apt-get -y install r-base lshw gdebi
 
 cd ${DEPS}
 
@@ -59,7 +61,7 @@ else
 	cd hdf5-1.8.4
 	./configure --prefix=/usr
 	make -sj2
-	sudo make install
+	make install
 	if [ $? -eq 0 ]; then
 			echo "----->HDF5 installed."
 	else
@@ -80,10 +82,10 @@ else
 	cd qwt-6.1.0
 	qmake qwt.pro
 	make -sj2
-	sudo make install
-	sudo cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
-	sudo ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
-	sudo ldconfig
+	make install
+	cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
+	ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
+	ldconfig
 	if [ $? -eq 0 ]; then
 		echo "----->Qwt installed."
 	else
@@ -93,7 +95,7 @@ else
 fi
 
 # Install rtxi_includes
-sudo rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
+rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
 if [ $? -eq 0 ]; then
 	echo "----->rtxi_includes synced."
 else
@@ -102,15 +104,18 @@ else
 fi
 find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 
+chown -R root.adm /usr/local/lib/rtxi_includes
+chmod g+s /usr/local/lib/rtxi_includes
+
 # Install dynamo
 echo "Installing DYNAMO utility..."
 
-sudo apt-get -y install mlton
+apt-get -y install mlton
 cd ${DYN}
 mllex dl.lex
 mlyacc dl.grm
 mlton dynamo.mlb
-sudo cp dynamo /usr/bin/
+cp dynamo /usr/bin/
 if [ $? -eq 0 ]; then
 	echo "----->DYNAMO translation utility installed."
 else
@@ -118,32 +123,53 @@ else
 	exit
 fi
 
-# Install RT kernel and RTXI
-cd ~/
-mkdir .config
-gdebi linux-image*
-gdebi linux-headers*
-./install_rtxi.sh # needs user to enter 1 in prompt, also don't use sudo
-
-# Install ggplot
+# Install ggplot (use mirror 94 if you want)
+apt-get install r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 r-cran-plyr r-cran-scales
 R
-install.packages("ggplot2") # use mirror 96 if you want
-install.packages("scales")
 install.packages("gridExtra")
-install.packages("plyr")
 q() # "n" - don't save workspace
 
+# Install RT kernel
+cd ~/
+gdebi linux-image*.deb
+gdebi linux-headers*.deb
+#cp handy-scripts/main.cpp rtxi/src/main.cpp # hehehe
+
+# Install RTXI and keep sources in /rtxi/home
+mkdir /home/RTXI
+mv ~/rtxi /home/RTXI/
+cd /home/RTXI/rtxi/scripts
+./install_rtxi.sh # needs user to enter 1 in prompt, also don't use sudo
+
+# Edit permissions to make the directory accessible to all users in adm
+cd /home/RTXI/rtxi
+git reset --hard
+git clean -xdf
+cd ../
+chown -R root.adm rtxi
+chmod 2775 rtxi
+find rtxi/. -name *.sh -type f -exec chmod 775 {} \;
+find rtxi/. -not -name *.sh -type f -exec chmod 664 {} \; #bad outcome need to git reset --hard
+chmod -R g+w rtxi
+
+# Create file in /etc/profile.d/ that will make the RTXI symlink at login
+cd /etc/profile.d/
+vi create_rtxi_symlink.h # Enter text below into the file. DON'T RUN IT IN THE SHELL!!!
+if [ -d /home/RTXI ]; then
+	if ! [ -d $HOME/RTXI ]; then
+		ln -s /home/RTXI RTXI
+	fi
+fi
+
 # Clean environment and exit
-# rm /run/resolvconf/resolv.conf # maybe don't do this...? 
+echo "" > /run/resolvconf/resolv.conf
+apt-get clean
 umount /proc /sys /dev/pts
 exit
 sudo umount edit/dev
 
 # Update files in live/ directory
 sudo bash -c "chroot edit dpkg-query -W > extract/casper/filesystem.manifest"
-sudo cp extract/casper/filesystem.manifest extract/casper/filesystem.manifest-desktop
-sudo sed -i '/ubiquity/d' extract/casper/filesystem.manifest-desktop
-sudo sed -i '/casper/d' extract/casper/filesystem.manifest-desktop
 
 sudo cp edit/boot/vmlinuz-3.8.13-xenomai-2.6.3-aufs extract/casper/vmlinuz.efi
 sudo cp edit/boot/initrd.img-3.8.13-xenomai-2.6.3-aufs extract/casper/initrd.lz
