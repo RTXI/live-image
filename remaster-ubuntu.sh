@@ -159,7 +159,7 @@ if [ -d /home/RTXI ]; then
 	if ! [ -d $HOME/RTXI ]; then
 		ln -s /home/RTXI RTXI
 	fi
-fi
+fi #Last line for the script. DON'T PUT THE FOLLOWING IN THIS SCRIPT!!!
 
 # Clean environment and exit
 echo "" > /run/resolvconf/resolv.conf
