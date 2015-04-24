@@ -106,6 +106,7 @@ find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 
 chown -R root.adm /usr/local/lib/rtxi_includes
 chmod g+s /usr/local/lib/rtxi_includes
+chmod -R g+w /usr/local/lib/rtxi_includes
 
 # Install dynamo
 echo "Installing DYNAMO utility..."
@@ -148,9 +149,9 @@ git clean -xdf
 cd ../
 chown -R root.adm rtxi
 chmod 2775 rtxi
-find rtxi/. -name *.sh -type f -exec chmod 775 {} \;
-find rtxi/. -not -name *.sh -type f -exec chmod 664 {} \; #bad outcome need to git reset --hard
 chmod -R g+w rtxi
+#find rtxi/. -name *.sh -type f -exec chmod 775 {} \;
+#find rtxi/. -not -name *.sh -type f -exec chmod 664 {} \; #bad outcome need to git reset --hard
 
 # Create file in /etc/profile.d/ that will make the RTXI symlink at login
 cd /etc/profile.d/
