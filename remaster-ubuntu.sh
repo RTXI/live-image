@@ -1,4 +1,4 @@
-#! /usr/bin/bash
+#! /usr/bin/env bash
 
 echo "Ubuntu mode..."
 
@@ -11,7 +11,8 @@ mv squashfs-root edit
 sudo umount mnt/
 
 # Prepare to chroot into the extracted iso
-sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf
+#sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf <-hehehe
+sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
 # copy RT kernel *.deb files and the Xenomai build
 
 # Enter the chroot
@@ -26,11 +27,12 @@ export HOME=/root
 export LC_ALL=C
 
 # Install dependencies
+apt-get update
+apt-get -y upgrade
 apt-get -y install vim git
 git clone https://github.com/rtxi/rtxi
 git clone https://github.com/anselg/handy-scripts
 cd rtxi
-git checkout qt4
 cd scripts
 DIR=$PWD
 ROOT=${DIR}/../
@@ -38,14 +40,14 @@ DEPS=${ROOT}/deps
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
 DYN=${DEPS}/dynamo
-apt-get -y install autotools-dev automake libtool
-apt-get -y install kernel-package
-apt-get -y install g++ gcc gdb
-apt-get -y install fakeroot crash kexec-tools makedumpfile kernel-wedge # Select "No" for kexec handling restarts
+apt-get -y install autotools-dev automake libtool kernel-package \
+                   g++ gcc gdb fakeroot crash kexec-tools makedumpfile \ 
+						 kernel-wedge git-core libncurses5 libncurses5-dev \ 
+						 libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev \
+                   qt4-dev-tools libqt4-dev libqt4-opengl-dev lshw gdebi r-base \
+                   r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 r-cran-plyr r-cran-scales 
+# add the deb-src urls for apt-get build-dep to work
 apt-get -y build-dep linux
-apt-get -y install git-core libncurses5 libncurses5-dev libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev
-apt-get -y install qt4-dev-tools libqt4-dev libqt4-opengl-dev
-apt-get -y install r-base lshw gdebi
 
 cd ${DEPS}
 
@@ -157,12 +159,16 @@ chmod -R g+w rtxi
 
 # Create file in /etc/profile.d/ that will make the RTXI symlink at login
 cd /etc/profile.d/
-vi create_rtxi_symlink.h # Enter text below into the file. DON'T RUN IT IN THE SHELL!!!
+vi create_rtxi_symlink.sh # Enter text below into the file. DON'T RUN IT IN THE SHELL!!!
 if [ -d /home/RTXI ]; then
 	if ! [ -d $HOME/RTXI ]; then
-		ln -s /home/RTXI RTXI
+		ln -s /home/RTXI $HOME/RTXI
 	fi
 fi #Last line for the script. DON'T PUT THE FOLLOWING IN THIS SCRIPT!!!
+
+# Disable the Public and Templates directories from being formed
+vi /etc/xdg/user-dirs.defaults
+# Comment out PUBLICSHARE and TEMPLATE
 
 # Clean environment and exit
 echo "" > /run/resolvconf/resolv.conf
@@ -174,12 +180,12 @@ sudo umount edit/dev
 # Update files in live/ directory
 sudo bash -c "chroot edit dpkg-query -W > extract/casper/filesystem.manifest"
 
-sudo cp edit/boot/vmlinuz-3.8.13-xenomai-2.6.3-aufs extract/casper/vmlinuz.efi
+sudo cp edit/boot/vmlinuz-3.8.13-xenomai-2.6.3-aufs extract/casper/vmlinuz.efi #vmlinuz (no .efi) for 32-bit
 sudo cp edit/boot/initrd.img-3.8.13-xenomai-2.6.3-aufs extract/casper/initrd.lz
 sudo mksquashfs edit extract/casper/filesystem.squashfs -comp xz
 sudo bash -c "printf $(sudo du -sx --block-size=1 edit | cut -f1) > extract/casper/filesystem.size"
 
-cd extrac -
+cd extract
 sudo bash -c "find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt"
 
 sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../custom.iso . 
