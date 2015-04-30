@@ -53,57 +53,27 @@ cd ${DEPS}
 
 # Installing HDF5
 echo "----->Checking for HDF5"
-
-if [ -f "/usr/include/hdf5.h" ]; then
-	echo "----->HDF5 already installed."
-else
-	echo "----->Installing HDF5..."
-	cd ${HDF}
-	tar xf hdf5-1.8.4.tar.bz2
-	cd hdf5-1.8.4
-	./configure --prefix=/usr
-	make -sj2
-	make install
-	if [ $? -eq 0 ]; then
-			echo "----->HDF5 installed."
-	else
-		echo "----->HDF5 installation failed."
-		exit
-	fi
-fi
+cd ${HDF}
+tar xf hdf5-1.8.4.tar.bz2
+cd hdf5-1.8.4
+./configure --prefix=/usr
+make -sj`nproc`
+make install
 
 # Installing Qwt
-echo "----->Checking for Qwt"
-
-if [ -f "/usr/local/lib/qwt/include/qwt.h" ]; then
-	echo "----->Qwt already installed."
-else
-	echo "----->Installing Qwt..."
-	cd ${QWT}
-	tar xf qwt-6.1.0.tar.bz2
-	cd qwt-6.1.0
-	qmake qwt.pro
-	make -sj2
-	make install
-	cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
-	ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
-	ldconfig
-	if [ $? -eq 0 ]; then
-		echo "----->Qwt installed."
-	else
-		echo "----->Qwt installation failed."
-	exit
-	fi
-fi
+echo "----->Installing Qwt..."
+cd ${QWT}
+tar xf qwt-6.1.0.tar.bz2
+cd qwt-6.1.0
+qmake qwt.pro
+make -sj`nproc`
+make install
+cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
+ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
+ldconfig
 
 # Install rtxi_includes
 rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
-if [ $? -eq 0 ]; then
-	echo "----->rtxi_includes synced."
-else
-	echo "----->rtxi_includes sync failed."
-	exit
-fi
 find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 
 chown -R root.adm /usr/local/lib/rtxi_includes
@@ -119,12 +89,6 @@ mllex dl.lex
 mlyacc dl.grm
 mlton dynamo.mlb
 cp dynamo /usr/bin/
-if [ $? -eq 0 ]; then
-	echo "----->DYNAMO translation utility installed."
-else
-	echo "----->DYNAMO translation utility installation failed."
-	exit
-fi
 
 # Install ggplot (use mirror 94 if you want)
 apt-get install r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 r-cran-plyr r-cran-scales
@@ -137,25 +101,32 @@ cd ~/
 gdebi linux-image*.deb
 gdebi linux-headers*.deb
 #cp handy-scripts/main.cpp rtxi/src/main.cpp # hehehe
+#scripts/install_rtxi.sh
+rm -r rtxi
+rm -r handy-scripts
 
 # Install RTXI and keep sources in /rtxi/home
 mkdir /home/RTXI
 chown root.adm /home/RTXI
+chmod g+s /home/RTXI
 chmod -R g+w /home/RTXI
-mv ~/rtxi /home/RTXI/
-cd /home/RTXI/rtxi/scripts
-./install_rtxi.sh # needs user to enter 1 in prompt, also don't use sudo
 
 # Edit permissions to make the directory accessible to all users in adm
-cd /home/RTXI/rtxi
-git reset --hard
-git clean -xdf
+cd /home/RTXI/
+git clone https://github.com/rtxi/rtxi.git
+mkdir modules
+cd modules
+git clone https://github.com/rtxi/signal-generator.git
+git clone https://github.com/rtxi/sync.git
+git clone https://github.com/rtxi/neuron.git
 cd ../
+
 chown -R root.adm rtxi
-chmod 2775 rtxi
+chmod g+s rtxi
 chmod -R g+w rtxi
-#find rtxi/. -name *.sh -type f -exec chmod 775 {} \;
-#find rtxi/. -not -name *.sh -type f -exec chmod 664 {} \; #bad outcome need to git reset --hard
+chown -R root.adm modules
+chmod g+s modules
+chmod -R g+w modules
 
 # Create file in /etc/profile.d/ that will make the RTXI symlink at login
 cd /etc/profile.d/
