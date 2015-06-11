@@ -35,7 +35,7 @@ apt-get update
 # apt-get -y upgrade <- this has been problematic
 apt-get -y install vim git
 git clone https://github.com/rtxi/rtxi
-#git clone https://github.com/anselg/handy-scripts
+git clone https://github.com/anselg/handy-scripts
 cd rtxi/scripts/
 apt-get -y install autotools-dev automake libtool kernel-package \
                    g++ gcc gdb fakeroot crash kexec-tools makedumpfile \
@@ -135,6 +135,10 @@ make install
 ###############################################################################
 
 cd $BASE
+
+# Copy the qpalette-configured main.cpp file. (REMOVE THIS FOR QT5!!!)
+cp ../handy-scripts/main.cpp src/main.cpp
+
 ./autogen.sh
 ./configure --enable-xenomai --enable-analogy --disable-comedi --disable-debug
 make -sj`nproc` -C ./
@@ -144,8 +148,8 @@ make install -C ./
 cp -f libtool /usr/local/lib/rtxi/
 cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
 cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi/
-if [ ! -d /root/.config ]; then mkdir /root/.config; fi
-cp -f scripts/icons/Trolltech.conf /root/.config/
+if [ ! -d /root/.config ]; then mkdir /root/.config; fi #REMOVE FOR QT5
+cp -f scripts/icons/Trolltech.conf /root/.config/ #REMOVE FOR QT5
 cp -f scripts/rtxi.desktop /usr/share/applications/
 cp -f scripts/rtxi.desktop /usr/share/applications/
 chmod +x /usr/share/applications/rtxi.desktop
