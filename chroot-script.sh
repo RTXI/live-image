@@ -1,6 +1,9 @@
 #! /bin/bash
 
-# Mount things and prepare environment
+###############################################################################
+# Mount ramfs and virtual filesystems. Prepare chroot environment. 
+###############################################################################
+
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t devpts none /dev/pts
@@ -8,13 +11,12 @@ export HOME=/root
 export LC_ALL=C
 cd
 
-# Install dependencies
-apt-get update
-# apt-get -y upgrade <- this has been problematic
-apt-get -y install vim git
-git clone https://github.com/rtxi/rtxi
-git clone https://github.com/anselg/handy-scripts
-cd rtxi/scripts/
+###############################################################################
+# Set global variables. 
+###############################################################################
+
+XENOMAI_VERSION=2.6.4
+KERNEL_VERSION=3.8.13
 
 DIR=$PWD
 ROOT=${DIR}/../
@@ -22,6 +24,17 @@ DEPS=${ROOT}/deps
 HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
 DYN=${DEPS}/dynamo
+
+###############################################################################
+# Install package dependencies. (DO NOT UPGRADE EXISTING PACKAGES!)
+###############################################################################
+
+apt-get update
+# apt-get -y upgrade <- this has been problematic
+apt-get -y install vim git
+git clone https://github.com/rtxi/rtxi
+#git clone https://github.com/anselg/handy-scripts
+cd rtxi/scripts/
 apt-get -y install autotools-dev automake libtool kernel-package \
                    g++ gcc gdb fakeroot crash kexec-tools makedumpfile \
                    kernel-wedge git-core libncurses5 libncurses5-dev \
@@ -33,7 +46,10 @@ apt-get -y build-dep linux
 
 cd ${DEPS}
 
-# Installing HDF5
+###############################################################################
+# Install HDF5
+###############################################################################
+
 echo "----->Checking for HDF5"
 cd ${HDF}
 tar xf hdf5-1.8.4.tar.bz2
@@ -42,7 +58,10 @@ cd hdf5-1.8.4
 make -sj`nproc`
 make install
 
-# Installing Qwt
+###############################################################################
+# Install Qwt
+###############################################################################
+
 echo "----->Installing Qwt..."
 cd ${QWT}
 tar xf qwt-6.1.0.tar.bz2
@@ -54,7 +73,10 @@ cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
 ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
 ldconfig
 
-# Install rtxi_includes
+###############################################################################
+# Install rtxi_includes and make it writable from all uses in group "adm"
+###############################################################################
+
 rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
 find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 
@@ -62,7 +84,10 @@ chown -R root.adm /usr/local/lib/rtxi_includes
 chmod g+s /usr/local/lib/rtxi_includes
 chmod -R g+w /usr/local/lib/rtxi_includes
 
+###############################################################################
 # Install dynamo
+###############################################################################
+
 echo "Installing DYNAMO utility..."
 
 apt-get -y install mlton
@@ -72,22 +97,34 @@ mlyacc dl.grm
 mlton dynamo.mlb
 cp dynamo /usr/bin/
 
-# Install gridExtra (it'll get it's on deb package in 16.04)
-# Be careful about version numbers. If gridExtra package updates, 
-# this link might break. 
+###############################################################################
+# Install gridExtra (it'll get it's on deb package in 16.04). Be careful about 
+# version numbers. If gridExtra package updates, this link might break. 
+###############################################################################
+
 cd ${DEPS}
 wget --no-check-certificate http://cran.r-project.org/src/contrib/gridExtra_0.9.1.tar.gz
 tar xf gridExtra_0.9.1.tar.gz
 R CMD INSTALL gridExtra
 
-# Install RT kernel
+###############################################################################
+# Install RT kernel (from the deb files you provided)
+###############################################################################
+
 cd ~/
 dpkg -i linux-image*.deb
 dpkg -i linux-headers*.deb
 
+###############################################################################
 # Install Xenomai
+###############################################################################
 
-# Install RTXI
+# Code goes here. 
+
+###############################################################################
+# Install RTXI and all the icons, config files, etc. that go with it. 
+###############################################################################
+
 cd rtxi
 ./autogen.sh
 ./configure --enable-xenomai --enable-analogy --disable-comedi --disable-debug
@@ -98,7 +135,8 @@ make install -C ./
 cp -f libtool /usr/local/lib/rtxi/
 cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
 cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi/
-cp -f scripts/icons/Trolltech.conf ~/.config/
+if [ ! -d /root/.config ]; then mkdir /root/.config; fi
+cp -f scripts/icons/Trolltech.conf /root/.config/
 cp -f scripts/rtxi.desktop /usr/share/applications/
 cp -f scripts/rtxi.desktop /usr/share/applications/
 chmod +x /usr/share/applications/rtxi.desktop
@@ -109,13 +147,12 @@ cp -f scripts/services/rtxi_load_analogy /etc/init.d/
 update-rc.d rtxi_load_analogy defaults
 ldconfig
 
-# Cleanup
-cd ~/
-rm -r rtxi
-rm -r handy-scripts
-rm -r *.deb
+###############################################################################
+# Create shared RTXI folder in /home/RTXI. All users can add and edit files 
+# here, and a process in /etc/profile.d/ will create a symlink to /home/RTXI in
+# all users' home directories. 
+###############################################################################
 
-# Store RTXI sources in /home/RTXI
 mkdir /home/RTXI
 chown root.adm /home/RTXI
 chmod g+s /home/RTXI
@@ -126,6 +163,7 @@ cd /home/RTXI/
 git clone https://github.com/rtxi/rtxi.git
 mkdir modules
 cd modules
+# Just for fun...
 git clone https://github.com/rtxi/signal-generator.git
 git clone https://github.com/rtxi/sync.git
 git clone https://github.com/rtxi/neuron.git
@@ -149,7 +187,13 @@ fi' > /etc/profile.d/create_rtxi_symlink.sh
 sed -i 's/PUBLICSHARE/#PUBLICSHARE/g' /etc/xdg/user-dirs.defaults
 sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 
-# Clean environment and exit
+###############################################################################
+# Cleanup and exit chroot.
+###############################################################################
+cd ~/
+rm -r rtxi
+rm -r handy-scripts
+rm -r *.deb
 echo "" > /run/resolvconf/resolv.conf
 apt-get clean
 umount /proc /sys /dev/pts

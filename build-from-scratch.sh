@@ -2,6 +2,20 @@
 
 echo "Building Ubuntu Live CD from scratch."
 
+###############################################################################
+# Install dependencies
+###############################################################################
+
+echo "Checking for dependencies first. (It's possible I forgot to add one.)"
+sudo apt-get -y install genisoimage squashfs-tools syslinux
+
+###############################################################################
+# Global variables go here. 
+###############################################################################
+
+XENOMAI_VERSION=2.6.4
+KERNEL_VERSION=3.8.13
+
 ROOT=$(pwd)
 BUILD=build_$(date +%F_%T)
 if [ "$(uname -m)" == "x86_64" ]; then
@@ -10,7 +24,11 @@ else
 	ARCH="i386"
 fi
 
-mkdir image_chroots
+###############################################################################
+# Download and extract a generic Ubuntu image. 
+###############################################################################
+
+if [ ! -d image_chroots]; then mkdir image_chroots; fi
 cd image_chroots
 mkdir ${BUILD}
 cd ${BUILD}
@@ -29,27 +47,42 @@ sudo unsquashfs mnt/casper/filesystem.squashfs
 mv squashfs-root edit
 sudo umount mnt/
 
+###############################################################################
+# Prepare the chroot environment. 
+###############################################################################
+
 # Prepare to chroot into the extracted iso
 #sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf <-For non-ubuntu systems
 sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
 sudo cp /etc/apt/sources.list edit/etc/apt/sources.list
 sudo cp $ROOT/deb_files/*.deb edit/root/
-# ^-THIS IS WRONG
-sudo cp -r /usr/xenomai edit/usr/
+#sudo cp -r /usr/xenomai edit/usr/
 # ^- this can cause problems later...
 
 # Enter the chroot
 echo "Time to chroot this mother."
-echo "(This could take a while.)"
+echo "(This may take a while. Go outside. Frolic. Eat a sandwich.)"
 sudo mount --bind /dev/ edit/dev
 sudo cp $ROOT/chroot-script.sh edit/
+
+###############################################################################
+# CHROOT! 
+###############################################################################
+
 sudo chroot edit ./chroot-script.sh
 
-# Exit the chroot
+###############################################################################
+# Exit chroot and clean up a bit. 
+###############################################################################
+
 sudo umount edit/dev
 sudo rm edit/chroot-script.sh
 
-# Update the filesystem.manifest
+###############################################################################
+# Update the image md5sum, package lists, etc. with changed introduced by the
+# chroot script, and then regenerate a compressed squashfs filesystem. 
+###############################################################################
+
 sudo bash -c "chroot edit dpkg-query -W > extract/casper/filesystem.manifest"
 if [ $ARCH == "amd64" ]; then
 	sudo cp edit/boot/vmlinuz-3.8.13-xenomai-2.6.3-aufs extract/casper/vmlinuz.efi
@@ -63,7 +96,11 @@ sudo bash -c "printf $(sudo du -sx --block-size=1 edit | cut -f1) > extract/casp
 cd extract
 sudo bash -c "find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt"
 
+###############################################################################
+# Create a new hybrid *.iso and make it bootable from USB (thanks to syslinux)
+###############################################################################
+
 sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../rtxi-ubuntu-$ARCH.iso . 
 sudo isohybrid ../rtxi-ubuntu-$ARCH.iso
 
-echo "Done...maybe."
+echo "Done."
