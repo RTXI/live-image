@@ -50,8 +50,6 @@ apt-get -y build-dep linux
 # Install HDF5
 ###############################################################################
 
-cd $DEPS
-
 echo "----->Checking for HDF5"
 cd $HDF
 tar xf hdf5-1.8.4.tar.bz2
@@ -80,7 +78,7 @@ ldconfig
 ###############################################################################
 
 rsync -a $DEPS/rtxi_includes /usr/local/lib/.
-find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
+find $BASE/plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 
 chown -R root.adm /usr/local/lib/rtxi_includes
 chmod g+s /usr/local/lib/rtxi_includes
@@ -122,7 +120,7 @@ dpkg -i linux-headers*.deb
 ###############################################################################
 
 # Code goes here. 
-cd ~/
+cd $DEPS
 mkdir build
 wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
 tar xf xenomai-$XENOMAI_VERSION.tar.bz2
@@ -136,7 +134,7 @@ make install
 # Install RTXI and all the icons, config files, etc. that go with it. 
 ###############################################################################
 
-cd ~/rtxi
+cd $BASE
 ./autogen.sh
 ./configure --enable-xenomai --enable-analogy --disable-comedi --disable-debug
 make -sj`nproc` -C ./
@@ -203,8 +201,6 @@ sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 ###############################################################################
 cd ~/
 rm -r rtxi
-rm -r build
-rm -r xenomai-$XENOMAI_VERSION
 rm -r handy-scripts
 rm -r *.deb
 echo "" > /run/resolvconf/resolv.conf
