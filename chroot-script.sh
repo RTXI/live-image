@@ -1,23 +1,4 @@
-#! /usr/bin/env bash
-
-echo "Ubuntu mode..."
-
-# Get started and extract the iso
-mkdir mnt extract
-sudo mount -o loop *iso mnt/
-sudo rsync --exclude=/casper/filesystem.squashfs -a mnt/ extract
-sudo unsquashfs mnt/casper/filesystem.squashfs
-mv squashfs-root edit
-sudo umount mnt/
-
-# Prepare to chroot into the extracted iso
-#sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf <-hehehe
-sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
-# copy RT kernel *.deb files and the Xenomai build
-
-# Enter the chroot
-sudo mount --bind /dev/ edit/dev
-sudo chroot edit
+#! /bin/bash
 
 # Mount things and prepare environment
 mount -t proc none /proc
@@ -25,15 +6,16 @@ mount -t sysfs none /sys
 mount -t devpts none /dev/pts
 export HOME=/root
 export LC_ALL=C
+cd
 
 # Install dependencies
 apt-get update
-apt-get -y upgrade
+# apt-get -y upgrade <- this has been problematic
 apt-get -y install vim git
 git clone https://github.com/rtxi/rtxi
 git clone https://github.com/anselg/handy-scripts
-cd rtxi
-cd scripts
+cd rtxi/scripts/
+
 DIR=$PWD
 ROOT=${DIR}/../
 DEPS=${ROOT}/deps
@@ -90,22 +72,50 @@ mlyacc dl.grm
 mlton dynamo.mlb
 cp dynamo /usr/bin/
 
-# Install ggplot (use mirror 94 if you want)
-apt-get install r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 r-cran-plyr r-cran-scales
-R
-install.packages("gridExtra")
-q() # "n" - don't save workspace
+# Install gridExtra (it'll get it's on deb package in 16.04)
+# Be careful about version numbers. If gridExtra package updates, 
+# this link might break. 
+cd ${DEPS}
+wget --no-check-certificate http://cran.r-project.org/src/contrib/gridExtra_0.9.1.tar.gz
+tar xf gridExtra_0.9.1.tar.gz
+R CMD INSTALL gridExtra
 
 # Install RT kernel
 cd ~/
-gdebi linux-image*.deb
-gdebi linux-headers*.deb
-#cp handy-scripts/main.cpp rtxi/src/main.cpp # hehehe
-#scripts/install_rtxi.sh
+dpkg -i linux-image*.deb
+dpkg -i linux-headers*.deb
+
+# Install Xenomai
+
+# Install RTXI
+cd rtxi
+./autogen.sh
+./configure --enable-xenomai --enable-analogy --disable-comedi --disable-debug
+make -sj`nproc` -C ./
+make install -C ./
+
+# Put all the icons, config files, etc. into place. 
+cp -f libtool /usr/local/lib/rtxi/
+cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
+cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi/
+cp -f scripts/icons/Trolltech.conf ~/.config/
+cp -f scripts/rtxi.desktop /usr/share/applications/
+cp -f scripts/rtxi.desktop /usr/share/applications/
+chmod +x /usr/share/applications/rtxi.desktop
+cp -f rtxi.conf /etc/rtxi.conf
+cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
+
+cp -f scripts/services/rtxi_load_analogy /etc/init.d/
+update-rc.d rtxi_load_analogy defaults
+ldconfig
+
+# Cleanup
+cd ~/
 rm -r rtxi
 rm -r handy-scripts
+rm -r *.deb
 
-# Install RTXI and keep sources in /rtxi/home
+# Store RTXI sources in /home/RTXI
 mkdir /home/RTXI
 chown root.adm /home/RTXI
 chmod g+s /home/RTXI
@@ -129,36 +139,18 @@ chmod g+s modules
 chmod -R g+w modules
 
 # Create file in /etc/profile.d/ that will make the RTXI symlink at login
-cd /etc/profile.d/
-vi create_rtxi_symlink.sh # Enter text below into the file. DON'T RUN IT IN THE SHELL!!!
-if [ -d /home/RTXI ]; then
+echo 'if [ -d /home/RTXI ]; then
 	if ! [ -d $HOME/RTXI ]; then
 		ln -s /home/RTXI $HOME/RTXI
 	fi
-fi #Last line for the script. DON'T PUT THE FOLLOWING IN THIS SCRIPT!!!
+fi' > /etc/profile.d/create_rtxi_symlink.sh
 
 # Disable the Public and Templates directories from being formed
-vi /etc/xdg/user-dirs.defaults
-# Comment out PUBLICSHARE and TEMPLATE
+sed -i 's/PUBLICSHARE/#PUBLICSHARE/g' /etc/xdg/user-dirs.defaults
+sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 
 # Clean environment and exit
 echo "" > /run/resolvconf/resolv.conf
 apt-get clean
 umount /proc /sys /dev/pts
 exit
-sudo umount edit/dev
-
-# Update files in live/ directory
-sudo bash -c "chroot edit dpkg-query -W > extract/casper/filesystem.manifest"
-
-sudo cp edit/boot/vmlinuz-3.8.13-xenomai-2.6.3-aufs extract/casper/vmlinuz.efi #vmlinuz (no .efi) for 32-bit
-sudo cp edit/boot/initrd.img-3.8.13-xenomai-2.6.3-aufs extract/casper/initrd.lz
-sudo mksquashfs edit extract/casper/filesystem.squashfs -comp xz
-sudo bash -c "printf $(sudo du -sx --block-size=1 edit | cut -f1) > extract/casper/filesystem.size"
-
-cd extract
-sudo bash -c "find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt"
-
-sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../custom.iso . 
-sudo isohybrid ../custom.iso
-echo "Done...maybe."
