@@ -9,7 +9,6 @@ mount -t sysfs none /sys
 mount -t devpts none /dev/pts
 export HOME=/root
 export LC_ALL=C
-cd
 
 ###############################################################################
 # Set global variables. 
@@ -18,12 +17,15 @@ cd
 XENOMAI_VERSION=2.6.4
 KERNEL_VERSION=3.8.13
 
-DIR=$PWD
-ROOT=${DIR}/../
-DEPS=${ROOT}/deps
-HDF=${DEPS}/hdf
-QWT=${DEPS}/qwt
-DYN=${DEPS}/dynamo
+cd $HOME
+
+BASE=$HOME/rtxi
+SCRIPTS=$BASE/scripts
+DEPS=$BASE/deps
+HDF=$DEPS/hdf
+QWT=$DEPS/qwt
+DYN=$DEPS/dynamo
+INCLUDES=$DEPS/rtxi_includes
 
 ###############################################################################
 # Install package dependencies. (DO NOT UPGRADE EXISTING PACKAGES!)
@@ -44,14 +46,14 @@ apt-get -y install autotools-dev automake libtool kernel-package \
 # add the deb-src urls for apt-get build-dep to work
 apt-get -y build-dep linux
 
-cd ${DEPS}
-
 ###############################################################################
 # Install HDF5
 ###############################################################################
 
+cd $DEPS
+
 echo "----->Checking for HDF5"
-cd ${HDF}
+cd $HDF
 tar xf hdf5-1.8.4.tar.bz2
 cd hdf5-1.8.4
 ./configure --prefix=/usr
@@ -63,7 +65,7 @@ make install
 ###############################################################################
 
 echo "----->Installing Qwt..."
-cd ${QWT}
+cd $QWT
 tar xf qwt-6.1.0.tar.bz2
 cd qwt-6.1.0
 qmake qwt.pro
@@ -77,7 +79,7 @@ ldconfig
 # Install rtxi_includes and make it writable from all uses in group "adm"
 ###############################################################################
 
-rsync -a ${DEPS}/rtxi_includes /usr/local/lib/.
+rsync -a $DEPS/rtxi_includes /usr/local/lib/.
 find ../plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 
 chown -R root.adm /usr/local/lib/rtxi_includes
@@ -91,18 +93,18 @@ chmod -R g+w /usr/local/lib/rtxi_includes
 echo "Installing DYNAMO utility..."
 
 apt-get -y install mlton
-cd ${DYN}
+cd $DYN
 mllex dl.lex
 mlyacc dl.grm
 mlton dynamo.mlb
 cp dynamo /usr/bin/
 
 ###############################################################################
-# Install gridExtra (it'll get it's on deb package in 16.04). Be careful about 
+# Install gridExtra (it'll get its own deb package in 16.04). Be careful about 
 # version numbers. If gridExtra package updates, this link might break. 
 ###############################################################################
 
-cd ${DEPS}
+cd $DEPS
 wget --no-check-certificate http://cran.r-project.org/src/contrib/gridExtra_0.9.1.tar.gz
 tar xf gridExtra_0.9.1.tar.gz
 R CMD INSTALL gridExtra
@@ -120,12 +122,21 @@ dpkg -i linux-headers*.deb
 ###############################################################################
 
 # Code goes here. 
+cd ~/
+mkdir build
+wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
+tar xf xenomai-$XENOMAI_VERSION.tar.bz2
+
+cd build
+../xenomai-$XENOMAI_VERSION/configure --enable-shared --enable-smp --enable-x86-sep
+make -s
+make install
 
 ###############################################################################
 # Install RTXI and all the icons, config files, etc. that go with it. 
 ###############################################################################
 
-cd rtxi
+cd ~/rtxi
 ./autogen.sh
 ./configure --enable-xenomai --enable-analogy --disable-comedi --disable-debug
 make -sj`nproc` -C ./
@@ -192,6 +203,8 @@ sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 ###############################################################################
 cd ~/
 rm -r rtxi
+rm -r build
+rm -r xenomai-$XENOMAI_VERSION
 rm -r handy-scripts
 rm -r *.deb
 echo "" > /run/resolvconf/resolv.conf

@@ -13,6 +13,7 @@ sudo apt-get -y install genisoimage squashfs-tools syslinux
 # Global variables go here. 
 ###############################################################################
 
+# These two aren't used in the script. Oh well. 
 XENOMAI_VERSION=2.6.4
 KERNEL_VERSION=3.8.13
 
@@ -54,7 +55,7 @@ sudo umount mnt/
 # Prepare to chroot into the extracted iso
 #sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf <-For non-ubuntu systems
 sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
-sudo cp /etc/apt/sources.list edit/etc/apt/sources.list
+sudo cp /etc/apt/sources.list edit/etc/apt/sources.list # the live-cd sources.list is incomplete
 sudo cp $ROOT/deb_files/*.deb edit/root/
 #sudo cp -r /usr/xenomai edit/usr/
 # ^- this can cause problems later...
