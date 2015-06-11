@@ -16,7 +16,7 @@ mkdir ${BUILD}
 cd ${BUILD}
 
 if [ $ARCH == "amd64" ]; then
-	wget --nio-check-certificate http://cdimage.ubuntu.com/ubuntu-gnome/releases/14.04.2/release/ubuntu-gnome-14.04.2-desktop-amd64.iso
+	wget --no-check-certificate http://cdimage.ubuntu.com/ubuntu-gnome/releases/14.04.2/release/ubuntu-gnome-14.04.2-desktop-amd64.iso
 else
 	wget --no-check-certificate http://cdimage.ubuntu.com/ubuntu-gnome/releases/14.04.2/release/ubuntu-gnome-14.04.2-desktop-i386.iso
 fi

@@ -23,9 +23,9 @@ HDF=${DEPS}/hdf
 QWT=${DEPS}/qwt
 DYN=${DEPS}/dynamo
 apt-get -y install autotools-dev automake libtool kernel-package \
-                   g++ gcc gdb fakeroot crash kexec-tools makedumpfile \ 
-						 kernel-wedge git-core libncurses5 libncurses5-dev \ 
-						 libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev \
+                   g++ gcc gdb fakeroot crash kexec-tools makedumpfile \
+                   kernel-wedge git-core libncurses5 libncurses5-dev \
+                   libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev \
                    qt4-dev-tools libqt4-dev libqt4-opengl-dev lshw gdebi r-base \
                    r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 r-cran-plyr r-cran-scales 
 # add the deb-src urls for apt-get build-dep to work
@@ -153,4 +153,6 @@ sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 echo "" > /run/resolvconf/resolv.conf
 apt-get clean
 umount /proc /sys /dev/pts
+
+echo "We are now done chrooting"
 exit
