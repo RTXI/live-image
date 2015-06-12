@@ -15,7 +15,7 @@ To build from scratch, you will need two things:
 git clone https://github.com/rtxi/live-image
 ````
 
-In the base of the live-image directory, create a directory called `deb_files`. Copy the \*.deb files for the real-time kernel headers and image into this directory.  
+In the base of the live-image directory, create a directory called `deb_files`. Copy the \*.deb files for the real-time kernel headers and image into this directory. The RT kernel binaries you include **must** have the aufs kernel module compiled. Otherwise, it cannot be used to boot the live CD.   
 
 Also, you should watch the kernel and xenomai versions in the real-time kernel you supply. By default, the build script will assume you are using kernel 3.8.13 and xenomai 2.6.4. If you aren't, you'll need to edit both the `build-from-scratch.sh` and `chroot-script.sh` scripts. 
 
