@@ -43,7 +43,7 @@ apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
                    kernel-wedge libncurses5-dev libelf-dev binutils-dev \
                    libgsl0-dev libboost-dev vim emacs lshw stress \
                    libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
-                   libqt5xml5 libqt5network5 qt5-default
+                   libqt5xml5 libqt5network5 qtbase5-dev qt5-default
 
 # add the deb-src urls for apt-get build-dep to work
 apt-get -y build-dep linux
