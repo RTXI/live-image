@@ -35,9 +35,11 @@ mkdir ${BUILD}
 cd ${BUILD}
 
 if [ $ARCH == "amd64" ]; then
-	wget --no-check-certificate http://cdimage.ubuntu.com/ubuntu-gnome/releases/trusty/release/ubuntu-gnome-$UBUNTU_VERSION-desktop-amd64.iso
+#	wget --no-check-certificate http://cdimage.ubuntu.com/ubuntu-gnome/releases/trusty/release/ubuntu-gnome-$UBUNTU_VERSION-desktop-amd64.iso
+	wget --no-check-certificate http://cdimage.ubuntu.com/lubuntu/releases/$UBUNTU_VERSION/release/lubuntu-$UBUNTU_VERSION-desktop-amd64.iso
 else
-	wget --no-check-certificate http://cdimage.ubuntu.com/ubuntu-gnome/releases/trusty/release/ubuntu-gnome-$UBUNTU_VERSION-desktop-i386.iso
+#	wget --no-check-certificate http://cdimage.ubuntu.com/ubuntu-gnome/releases/trusty/release/ubuntu-gnome-$UBUNTU_VERSION-desktop-i386.iso
+	wget --no-check-certificate http://cdimage.ubuntu.com/lubuntu/releases/$UBUNTU_VERSION/release/lubuntu-$UBUNTU_VERSION-desktop-i386.iso
 fi
 
 # Get started and extract the iso
