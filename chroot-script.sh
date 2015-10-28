@@ -16,6 +16,7 @@ export LC_ALL=C
 
 XENOMAI_VERSION=2.6.4
 KERNEL_VERSION=3.8.13
+QWT_VERSION=6.1.2
 
 cd $HOME
 
@@ -33,16 +34,17 @@ INCLUDES=$DEPS/rtxi_includes
 
 apt-get update
 # apt-get -y upgrade <- this has been problematic
-apt-get -y install vim git
+apt-get -y install git
 git clone https://github.com/rtxi/rtxi
-git clone https://github.com/anselg/handy-scripts
+#git clone https://github.com/anselg/handy-scripts
 cd rtxi/scripts/
-apt-get -y install autotools-dev automake libtool kernel-package \
-                   g++ gcc gdb fakeroot crash kexec-tools makedumpfile \
-                   kernel-wedge git-core libncurses5 libncurses5-dev \
-                   libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev \
-                   qt4-dev-tools libqt4-dev libqt4-opengl-dev lshw gdebi r-base \
-                   r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 r-cran-plyr r-cran-scales 
+apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
+                   gdb fakeroot crash kexec-tools makedumpfile \
+                   kernel-wedge libncurses5-dev libelf-dev binutils-dev \
+                   libgsl0-dev libboost-dev vim emacs lshw stress \
+                   libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
+                   libqt5xml5 libqt5network5 qt5-default
+
 # add the deb-src urls for apt-get build-dep to work
 apt-get -y build-dep linux
 
@@ -64,13 +66,13 @@ make install
 
 echo "----->Installing Qwt..."
 cd $QWT
-tar xf qwt-6.1.0.tar.bz2
-cd qwt-6.1.0
+tar xf qwt-${QWT_VERSION}.tar.bz2
+cd qwt-$QWT_VERSION
 qmake qwt.pro
 make -sj`nproc`
 make install
-cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
-ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
+cp -vf /usr/local/lib-$QWT_VERSION/qwt/lib/libqwt.so.$QWT_VERSION /usr/lib/.
+ln -sf /usr/lib/libqwt.so.$QWT_VERSION /usr/lib/libqwt.so
 ldconfig
 
 ###############################################################################
@@ -83,29 +85,6 @@ find $BASE/plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
 chown -R root.adm /usr/local/lib/rtxi_includes
 chmod g+s /usr/local/lib/rtxi_includes
 chmod -R g+w /usr/local/lib/rtxi_includes
-
-###############################################################################
-# Install dynamo
-###############################################################################
-
-echo "Installing DYNAMO utility..."
-
-apt-get -y install mlton
-cd $DYN
-mllex dl.lex
-mlyacc dl.grm
-mlton dynamo.mlb
-cp dynamo /usr/bin/
-
-###############################################################################
-# Install gridExtra (it'll get its own deb package in 16.04). Be careful about 
-# version numbers. If gridExtra package updates, this link might break. 
-###############################################################################
-
-cd $DEPS
-wget --no-check-certificate http://cran.r-project.org/src/contrib/gridExtra_0.9.1.tar.gz
-tar xf gridExtra_0.9.1.tar.gz
-R CMD INSTALL gridExtra
 
 ###############################################################################
 # Install RT kernel (from the deb files you provided)
@@ -136,9 +115,6 @@ make install
 
 cd $BASE
 
-# Copy the qpalette-configured main.cpp file. (REMOVE THIS FOR QT5!!!)
-cp ../handy-scripts/main.cpp src/main.cpp
-
 ./autogen.sh
 ./configure --enable-xenomai --enable-analogy --disable-comedi --disable-debug
 make -sj`nproc` -C ./
@@ -148,8 +124,6 @@ make install -C ./
 cp -f libtool /usr/local/lib/rtxi/
 cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
 cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi/
-if [ ! -d /root/.config ]; then mkdir /root/.config; fi #REMOVE FOR QT5
-cp -f scripts/icons/Trolltech.conf /root/.config/ #REMOVE FOR QT5
 cp -f scripts/rtxi.desktop /usr/share/applications/
 cp -f scripts/rtxi.desktop /usr/share/applications/
 chmod +x /usr/share/applications/rtxi.desktop
@@ -175,12 +149,6 @@ chmod -R g+w /home/RTXI
 cd /home/RTXI/
 git clone https://github.com/rtxi/rtxi.git
 mkdir modules
-cd modules
-# Just for fun...
-git clone https://github.com/rtxi/signal-generator.git
-git clone https://github.com/rtxi/sync.git
-git clone https://github.com/rtxi/neuron.git
-cd ../
 
 chown -R root.adm rtxi
 chmod g+s rtxi
