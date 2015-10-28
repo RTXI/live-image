@@ -29,7 +29,7 @@ fi
 # Download and extract a generic Ubuntu image. 
 ###############################################################################
 
-if [ ! -d image_chroots]; then mkdir image_chroots; fi
+if [ ! -d image_chroots ]; then mkdir image_chroots; fi
 cd image_chroots
 mkdir ${BUILD}
 cd ${BUILD}
