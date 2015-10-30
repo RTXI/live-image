@@ -103,7 +103,7 @@ cp dynamo /usr/bin/
 ###############################################################################
 
 cd $DEPS
-wget --no-check-certificate http://cran.r-project.org/src/contrib/gridExtra_0.9.1.tar.gz
+wget --no-check-certificate https://cran.r-project.org/src/contrib/Archive/gridExtra/gridExtra_0.9.1.tar.gz
 tar xf gridExtra_0.9.1.tar.gz
 R CMD INSTALL gridExtra
 
