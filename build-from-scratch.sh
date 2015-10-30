@@ -69,7 +69,14 @@ sudo umount mnt/
 # Prepare to chroot into the extracted iso
 #sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf <-For non-ubuntu systems
 sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
-sudo cp /etc/apt/sources.list edit/etc/apt/sources.list # the live-cd sources.list is incomplete, so replace it with your own
+#sudo cp /etc/apt/sources.list edit/etc/apt/sources.list # the live-cd sources.list is incomplete, so replace it with your own
+
+# Add deb-src urls
+sudo bash -c '
+grep "deb " edit/etc/apt/sources.list | while read -r line; do 
+	echo "$line" | sed -e "s/deb/deb-src/g" >> edit/etc/apt/sources.list; 
+done'
+
 sudo cp $ROOT/deb_files/*.deb edit/root/ # assumes pre-compiled rt kernel *.deb files are in deb_files/
 #sudo cp -r /usr/xenomai edit/usr/
 # ^- this can cause problems later...
@@ -117,7 +124,7 @@ sudo bash -c "find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boo
 # Create a new hybrid *.iso and make it bootable from USB (thanks to syslinux)
 ###############################################################################
 
-sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../rtxi-ubuntu-$ARCH.iso . 
-sudo isohybrid ../rtxi-ubuntu-$ARCH.iso
+sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../rtxi-$UBUNTU_FLAVOR-$ARCH.iso . 
+sudo isohybrid ../rtxi-$UBUNTU_FLAVOR-$ARCH.iso
 
 echo "Done."

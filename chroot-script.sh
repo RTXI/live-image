@@ -38,8 +38,6 @@ apt-get -y install git
 git clone https://github.com/rtxi/rtxi
 cd rtxi
 git checkout qt5
-#git clone https://github.com/anselg/handy-scripts
-cd scripts/
 apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
                    gdb fakeroot crash kexec-tools makedumpfile \
                    kernel-wedge libncurses5-dev libelf-dev binutils-dev \
@@ -47,7 +45,7 @@ apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
                    libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
                    libqt5xml5 libqt5network5 qtbase5-dev qt5-default \
                    libgles2-mesa-dev gdebi libqt5designer5 qttools5-dev-tools \
-                   libqt5designercomponent5 qttools5-dev
+                   libqt5designercomponents5 qttools5-dev
 apt-get -y install -f
 
 # add the deb-src urls for apt-get build-dep to work
@@ -81,7 +79,7 @@ ln -sf /usr/lib/libqwt.so.$QWT_VERSION /usr/lib/libqwt.so
 ldconfig
 
 ###############################################################################
-# Install rtxi_includes and make it writable from all uses in group "adm"
+# Install rtxi_includes and make it writable from all users in group "adm"
 ###############################################################################
 
 rsync -a $DEPS/rtxi_includes /usr/local/lib/.
@@ -96,10 +94,8 @@ chmod -R g+w /usr/local/lib/rtxi_includes
 ###############################################################################
 
 cd ~/
-#dpkg -i linux-image*.deb
-#dpkg -i linux-headers*.deb
-gdebi linux-image*.deb
-gdebi linux-headers*.deb
+gdebi -n linux-image*.deb
+gdebi -n linux-headers*.deb
 
 ###############################################################################
 # Install Xenomai
