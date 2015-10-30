@@ -36,14 +36,19 @@ apt-get update
 # apt-get -y upgrade <- this has been problematic
 apt-get -y install git
 git clone https://github.com/rtxi/rtxi
+cd rtxi
+git checkout qt5
 #git clone https://github.com/anselg/handy-scripts
-cd rtxi/scripts/
+cd scripts/
 apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
                    gdb fakeroot crash kexec-tools makedumpfile \
                    kernel-wedge libncurses5-dev libelf-dev binutils-dev \
                    libgsl0-dev libboost-dev vim emacs lshw stress \
                    libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
-                   libqt5xml5 libqt5network5 qtbase5-dev qt5-default
+                   libqt5xml5 libqt5network5 qtbase5-dev qt5-default \
+                   libgles2-mesa-dev gdebi libqt5designer5 qttools5-dev-tools \
+                   libqt5designercomponent5 qttools5-dev
+apt-get -y install -f
 
 # add the deb-src urls for apt-get build-dep to work
 apt-get -y build-dep linux
@@ -66,12 +71,12 @@ make install
 
 echo "----->Installing Qwt..."
 cd $QWT
-tar xf qwt-${QWT_VERSION}.tar.bz2
+tar xf qwt-$QWT_VERSION.tar.bz2
 cd qwt-$QWT_VERSION
 qmake qwt.pro
 make -sj`nproc`
 make install
-cp -vf /usr/local/lib-$QWT_VERSION/qwt/lib/libqwt.so.$QWT_VERSION /usr/lib/.
+cp -vf /usr/local/qwt-$QWT_VERSION/lib/libqwt.so.$QWT_VERSION /usr/lib/.
 ln -sf /usr/lib/libqwt.so.$QWT_VERSION /usr/lib/libqwt.so
 ldconfig
 
@@ -91,8 +96,10 @@ chmod -R g+w /usr/local/lib/rtxi_includes
 ###############################################################################
 
 cd ~/
-dpkg -i linux-image*.deb
-dpkg -i linux-headers*.deb
+#dpkg -i linux-image*.deb
+#dpkg -i linux-headers*.deb
+gdebi linux-image*.deb
+gdebi linux-headers*.deb
 
 ###############################################################################
 # Install Xenomai
@@ -116,7 +123,7 @@ make install
 cd $BASE
 
 ./autogen.sh
-./configure --enable-xenomai --enable-analogy --disable-comedi --disable-debug
+./configure --enable-xenomai --enable-analogy 
 make -sj`nproc` -C ./
 make install -C ./
 
@@ -173,7 +180,6 @@ sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 ###############################################################################
 cd ~/
 rm -r rtxi
-rm -r handy-scripts
 rm -r *.deb
 echo "" > /run/resolvconf/resolv.conf
 apt-get clean
