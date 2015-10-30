@@ -14,9 +14,10 @@ sudo apt-get -y install genisoimage squashfs-tools syslinux
 #
 # NOTES: 
 #  * UBUNTU_VERSION only works with the most recent LTS release, so the script 
-#    will break when that happens unless its updated. 
-#  * the options for UBUNTU_VERSION are: ubuntu, lubuntu, edubuntu, kubuntu, 
-#    ubuntu-core (probably won't work), ubuntukylin, ubuntu-gnome, and xubuntu.
+#    will break when a new version comes out unless the variable is updated. 
+#  * the options for UBUNTU_VERSION are: ubuntu, lubuntu, kubuntu, ubuntukylin 
+#    ubuntu-core (probably won't work), ubuntu-gnome, and xubuntu.
+# 
 ###############################################################################
 
 XENOMAI_VERSION=2.6.4
