@@ -47,6 +47,9 @@ else
 	wget --no-check-certificate http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/trusty/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 fi
 
+exit_status = $?
+if [ $exit_status != 0 ] then; echo "Live CD Download failed... exiting"; exit $exit_status; fi
+
 # Get started and extract the iso
 mkdir mnt extract
 sudo mount -o loop *.iso mnt/
