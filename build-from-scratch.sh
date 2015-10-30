@@ -41,14 +41,14 @@ cd image_chroots
 mkdir ${BUILD}
 cd ${BUILD}
 
-if [ $UBUNTU_FLAVOR == "ubuntu" ]; then
+if [ "$UBUNTU_FLAVOR" = "ubuntu" ]; then
 	wget --no-check-certificate http://releases.ubuntu.com/$UBUNTU_VERSION/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 else
 	wget --no-check-certificate http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/trusty/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 fi
 
 exit_status = $?
-if [ $exit_status != 0 ] then; echo "Live CD Download failed... exiting"; exit $exit_status; fi
+if [ "$exit_status" != 0 ] then; echo "Live CD Download failed... exiting"; exit $exit_status; fi
 
 # Get started and extract the iso
 mkdir mnt extract
@@ -97,7 +97,7 @@ sudo rm edit/chroot-script.sh
 ###############################################################################
 
 sudo bash -c "chroot edit dpkg-query -W > extract/casper/filesystem.manifest"
-if [ $ARCH == "amd64" ]; then
+if [ "$ARCH" = "amd64" ]; then
 	sudo cp edit/boot/vmlinuz-$KERNEL_VERSION-xenomai-$XENOMAI_VERSION-aufs extract/casper/vmlinuz.efi
 else
 	sudo cp edit/boot/vmlinuz-$KERNEL_VERSION-xenomai-$XENOMAI_VERSION-aufs extract/casper/vmlinuz
