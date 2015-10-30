@@ -6,7 +6,7 @@ echo "Building Ubuntu Live CD from scratch."
 # Install dependencies
 ###############################################################################
 
-echo "Checking for dependencies first. (It's possible I forgot to add one.)"
+echo "Checking for dependencies..."
 sudo apt-get -y install genisoimage squashfs-tools syslinux
 
 ###############################################################################
@@ -69,7 +69,6 @@ sudo umount mnt/
 # Prepare to chroot into the extracted iso
 #sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf <-For non-ubuntu systems
 sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
-#sudo cp /etc/apt/sources.list edit/etc/apt/sources.list # the live-cd sources.list is incomplete, so replace it with your own
 
 # Add deb-src urls
 sudo bash -c '
@@ -77,15 +76,16 @@ grep "deb " edit/etc/apt/sources.list | while read -r line; do
 	echo "$line" | sed -e "s/deb/deb-src/g" >> edit/etc/apt/sources.list; 
 done'
 
-sudo cp $ROOT/deb_files/*.deb edit/root/ # assumes pre-compiled rt kernel *.deb files are in deb_files/
-#sudo cp -r /usr/xenomai edit/usr/
-# ^- this can cause problems later...
+# Copy pre-compiled RT kernel deb files from the deb_files/ folder
+sudo cp $ROOT/deb_files/*.deb edit/root/ 
 
 # Enter the chroot
 echo "Time to chroot this mother."
 echo "(This may take a while. Go outside. Frolic. Eat a sandwich.)"
 sudo mount --bind /dev/ edit/dev
-sudo cp $ROOT/chroot-script.sh edit/ # copy the chroot script into the chroot environment
+
+# Copy the chroot script into the chroot environment
+sudo cp $ROOT/chroot-script.sh edit/ 
 
 ###############################################################################
 # CHROOT! 
