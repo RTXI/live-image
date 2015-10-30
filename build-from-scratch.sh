@@ -11,11 +11,18 @@ sudo apt-get -y install genisoimage squashfs-tools syslinux
 
 ###############################################################################
 # Global variables go here. 
+#
+# NOTES: 
+#  * UBUNTU_VERSION only works with the most recent LTS release, so the script 
+#    will break when that happens unless its updated. 
+#  * the options for UBUNTU_VERSION are: ubuntu, lubuntu, edubuntu, kubuntu, 
+#    ubuntu-core (probably won't work), ubuntukylin, ubuntu-gnome, and xubuntu.
 ###############################################################################
 
 XENOMAI_VERSION=2.6.4
 KERNEL_VERSION=3.8.13
-UBUNTU_VERSION=14.04.3
+UBUNTU_VERSION=14.04.3 # keep this updated!
+UBUNTU_FLAVOR=lubuntu
 
 ROOT=$(pwd)
 BUILD=build_$(date +%F_%T)
@@ -34,12 +41,10 @@ cd image_chroots
 mkdir ${BUILD}
 cd ${BUILD}
 
-if [ $ARCH == "amd64" ]; then
-#	wget --no-check-certificate http://cdimage.ubuntu.com/ubuntu-gnome/releases/trusty/release/ubuntu-gnome-$UBUNTU_VERSION-desktop-amd64.iso
-	wget --no-check-certificate http://cdimage.ubuntu.com/lubuntu/releases/$UBUNTU_VERSION/release/lubuntu-$UBUNTU_VERSION-desktop-amd64.iso
+if [ $UBUNTU_FLAVOR == "ubuntu" ]; then
+	wget --no-check-certificate http://releases.ubuntu.com/$UBUNTU_VERSION/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 else
-#	wget --no-check-certificate http://cdimage.ubuntu.com/ubuntu-gnome/releases/trusty/release/ubuntu-gnome-$UBUNTU_VERSION-desktop-i386.iso
-	wget --no-check-certificate http://cdimage.ubuntu.com/lubuntu/releases/$UBUNTU_VERSION/release/lubuntu-$UBUNTU_VERSION-desktop-i386.iso
+	wget --no-check-certificate http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/trusty/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 fi
 
 # Get started and extract the iso
