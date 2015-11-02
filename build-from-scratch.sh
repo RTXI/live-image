@@ -17,7 +17,6 @@ sudo apt-get -y install genisoimage squashfs-tools syslinux
 #    will break when a new version comes out unless the variable is updated. 
 #  * the options for UBUNTU_VERSION are: ubuntu, lubuntu, kubuntu, ubuntukylin 
 #    ubuntu-core (probably won't work), ubuntu-gnome, and xubuntu.
-# 
 ###############################################################################
 
 XENOMAI_VERSION=2.6.4
@@ -27,7 +26,7 @@ UBUNTU_FLAVOR=lubuntu
 
 ROOT=$(pwd)
 BUILD=build_$(date +%F_%T)
-if [ "$(uname -m)" == "x86_64" ]; then
+if [ "$(uname -m)" = "x86_64" ]; then
 	ARCH="amd64"
 else
 	ARCH="i386"
