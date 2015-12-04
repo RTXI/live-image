@@ -43,22 +43,22 @@ if [ "$RTXI_VERSION" == "2.1" ]; then
 	cd rtxi
 	git checkout qt5
 	apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
-							 gdb fakeroot crash kexec-tools makedumpfile \
-							 kernel-wedge libncurses5-dev libelf-dev binutils-dev \
-							 libgsl0-dev libboost-dev vim emacs lshw stress \
-							 libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
-							 libqt5xml5 libqt5network5 qtbase5-dev qt5-default \
-							 libgles2-mesa-dev gdebi libqt5designer5 qttools5-dev \
-							 libqt5designercomponents5 qttools5-dev-tools \
+	                   gdb fakeroot crash kexec-tools makedumpfile \
+	                   kernel-wedge libncurses5-dev libelf-dev binutils-dev \
+	                   libgsl0-dev libboost-dev vim emacs lshw stress \
+	                   libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
+	                   libqt5xml5 libqt5network5 qtbase5-dev qt5-default \
+	                   libgles2-mesa-dev gdebi libqt5designer5 qttools5-dev \
+	                   libqt5designercomponents5 qttools5-dev-tools \
 	                   libgit2-dev libmarkdown2-dev
 elif [ "$RTXI_VERSION" == "2.0" ]; then
 	git clone https://github.com/rtxi/rtxi
 	git clone https://github.com/anselg/handy-scripts
 	cd rtxi
 	apt-get -y install autotools-dev automake libtool kernel-package \
-							 g++ gcc gdb fakeroot crash kexec-tools makedumpfile \
-							 kernel-wedge git-core libncurses5 libncurses5-dev \
-							 libelf-dev binutils-dev libgsl0-dev vim stress lshw \
+	                   g++ gcc gdb fakeroot crash kexec-tools makedumpfile \
+	                   kernel-wedge git-core libncurses5 libncurses5-dev \
+	                   libelf-dev binutils-dev libgsl0-dev vim stress lshw \
 	                   libboost-dev qt4-dev-tools libqt4-dev libqt4-opengl-dev \
 	                   gdebi r-base r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 \
 	                   r-cran-plyr r-cran-scales
