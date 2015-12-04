@@ -19,6 +19,7 @@ sudo apt-get -y install genisoimage squashfs-tools syslinux
 #    ubuntu-core (probably won't work), ubuntu-gnome, and xubuntu.
 ###############################################################################
 
+RTXI_VERSION=2.1
 XENOMAI_VERSION=2.6.4
 KERNEL_VERSION=3.8.13
 UBUNTU_VERSION=14.04.3 # keep this updated!
@@ -123,7 +124,7 @@ sudo bash -c "find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boo
 # Create a new hybrid *.iso and make it bootable from USB (thanks to syslinux)
 ###############################################################################
 
-sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../rtxi-$UBUNTU_FLAVOR-$ARCH.iso . 
-sudo isohybrid ../rtxi-$UBUNTU_FLAVOR-$ARCH.iso
+sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../rtxi-$RTXI_VERSION-$UBUNTU_FLAVOR-$UBUNTU_VERSION-$ARCH.iso . 
+sudo isohybrid ../rtxi-$RTXI_VERSION-$UBUNTU_FLAVOR-$UBUNTU_VERSION-$ARCH.iso
 
 echo "Done."
