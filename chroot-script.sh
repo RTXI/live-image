@@ -14,8 +14,10 @@ export LC_ALL=C
 # Set global variables. 
 ###############################################################################
 
+RTXI_VERSION=2.1
 XENOMAI_VERSION=2.6.4
 KERNEL_VERSION=3.8.13
+QWT_VERSION=6.1.2 # v6.1.0 for RTXI v2.0
 
 cd $HOME
 
@@ -33,18 +35,70 @@ INCLUDES=$DEPS/rtxi_includes
 
 apt-get update
 # apt-get -y upgrade <- this has been problematic
-apt-get -y install vim git
-git clone https://github.com/rtxi/rtxi
-git clone https://github.com/anselg/handy-scripts
-cd rtxi/scripts/
-apt-get -y install autotools-dev automake libtool kernel-package \
-                   g++ gcc gdb fakeroot crash kexec-tools makedumpfile \
-                   kernel-wedge git-core libncurses5 libncurses5-dev \
-                   libelf-dev binutils-dev libgsl0-dev vim stress libboost-dev \
-                   qt4-dev-tools libqt4-dev libqt4-opengl-dev lshw gdebi r-base \
-                   r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 r-cran-plyr r-cran-scales 
+apt-get -y install git
+
+# check whether to build v2.0 or v2.1. 
+if [ "$RTXI_VERSION" == "2.1" ]; then
+	git clone https://github.com/rtxi/rtxi
+	cd rtxi
+	git checkout qt5
+	apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
+							 gdb fakeroot crash kexec-tools makedumpfile \
+							 kernel-wedge libncurses5-dev libelf-dev binutils-dev \
+							 libgsl0-dev libboost-dev vim emacs lshw stress \
+							 libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a \
+							 libqt5xml5 libqt5network5 qtbase5-dev qt5-default \
+							 libgles2-mesa-dev gdebi libqt5designer5 qttools5-dev \
+							 libqt5designercomponents5 qttools5-dev-tools \
+	                   libgit2-dev libmarkdown2-dev
+elif [ "$RTXI_VERSION" == "2.0" ]; then
+	git clone https://github.com/rtxi/rtxi
+	git clone https://github.com/anselg/handy-scripts
+	cd rtxi
+	apt-get -y install autotools-dev automake libtool kernel-package \
+							 g++ gcc gdb fakeroot crash kexec-tools makedumpfile \
+							 kernel-wedge git-core libncurses5 libncurses5-dev \
+							 libelf-dev binutils-dev libgsl0-dev vim stress lshw \
+	                   libboost-dev qt4-dev-tools libqt4-dev libqt4-opengl-dev \
+	                   gdebi r-base r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 \
+	                   r-cran-plyr r-cran-scales
+else 
+	echo "Invalid RTXI version set"
+	exit
+fi
+	
+apt-get -y install -f
+
 # add the deb-src urls for apt-get build-dep to work
 apt-get -y build-dep linux
+
+###############################################################################
+# Install gridExtra for v2.0 (it'll get its own deb package in 16.04). Be 
+# careful about version numbers. If gridExtra package updates, this link might 
+# break. 
+###############################################################################
+
+if [ "$RTXI_VERSION" == "2.0" ]; then
+	cd $DEPS
+	wget --no-check-certificate https://cran.r-project.org/src/contrib/Archive/gridExtra/gridExtra_0.9.1.tar.gz
+	tar xf gridExtra_0.9.1.tar.gz
+	R CMD INSTALL gridExtra
+fi
+
+###############################################################################
+# Install dynamo for v2.0
+###############################################################################
+
+if [ "$RTXI_VERSION" == "2.0" ]; then
+	echo "Installing DYNAMO utility..."
+	apt-get -y install mlton
+	
+	cd $DYN
+	mllex dl.lex
+	mlyacc dl.grm
+	mlton dynamo.mlb
+	cp dynamo /usr/bin/
+fi
 
 ###############################################################################
 # Install HDF5
@@ -64,17 +118,17 @@ make install
 
 echo "----->Installing Qwt..."
 cd $QWT
-tar xf qwt-6.1.0.tar.bz2
-cd qwt-6.1.0
+tar xf qwt-$QWT_VERSION.tar.bz2
+cd qwt-$QWT_VERSION
 qmake qwt.pro
 make -sj`nproc`
 make install
-cp /usr/local/lib/qwt/lib/libqwt.so.6.1.0 /usr/lib/.
-ln -sf /usr/lib/libqwt.so.6.1.0 /usr/lib/libqwt.so
+cp -vf /usr/local/qwt-$QWT_VERSION/lib/libqwt.so.$QWT_VERSION /usr/lib/.
+ln -sf /usr/lib/libqwt.so.$QWT_VERSION /usr/lib/libqwt.so
 ldconfig
 
 ###############################################################################
-# Install rtxi_includes and make it writable from all uses in group "adm"
+# Install rtxi_includes and make it writable from all users in group "adm"
 ###############################################################################
 
 rsync -a $DEPS/rtxi_includes /usr/local/lib/.
@@ -85,35 +139,12 @@ chmod g+s /usr/local/lib/rtxi_includes
 chmod -R g+w /usr/local/lib/rtxi_includes
 
 ###############################################################################
-# Install dynamo
-###############################################################################
-
-echo "Installing DYNAMO utility..."
-
-apt-get -y install mlton
-cd $DYN
-mllex dl.lex
-mlyacc dl.grm
-mlton dynamo.mlb
-cp dynamo /usr/bin/
-
-###############################################################################
-# Install gridExtra (it'll get its own deb package in 16.04). Be careful about 
-# version numbers. If gridExtra package updates, this link might break. 
-###############################################################################
-
-cd $DEPS
-wget --no-check-certificate https://cran.r-project.org/src/contrib/Archive/gridExtra/gridExtra_0.9.1.tar.gz
-tar xf gridExtra_0.9.1.tar.gz
-R CMD INSTALL gridExtra
-
-###############################################################################
 # Install RT kernel (from the deb files you provided)
 ###############################################################################
 
 cd ~/
-dpkg -i linux-image*.deb
-dpkg -i linux-headers*.deb
+gdebi -n linux-image*.deb
+gdebi -n linux-headers*.deb
 
 ###############################################################################
 # Install Xenomai
@@ -136,11 +167,16 @@ make install
 
 cd $BASE
 
-# Copy the qpalette-configured main.cpp file. (REMOVE THIS FOR QT5!!!)
-cp ../handy-scripts/main.cpp src/main.cpp
+# Theming for Qt4 (v2.0 only)
+if [ "$RTXI_VERSION" == "2.0" ]; then
+	cp ../handy-scripts/rtxi_utils/ui-tweaks/main.cpp src/main.cpp
+	cp ../handy-scripts/rtxi_utils/ui-tweaks/default_gui_model.cpp src/default_gui_model.cpp
+	if [ ! -d /root/.config ]; then mkdir /root/.config; fi
+	cp -f scripts/icons/Trolltech.conf /root/.config/ 
+fi
 
 ./autogen.sh
-./configure --enable-xenomai --enable-analogy --disable-comedi --disable-debug
+./configure --enable-xenomai --enable-analogy 
 make -sj`nproc` -C ./
 make install -C ./
 
@@ -148,9 +184,6 @@ make install -C ./
 cp -f libtool /usr/local/lib/rtxi/
 cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
 cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi/
-if [ ! -d /root/.config ]; then mkdir /root/.config; fi #REMOVE FOR QT5
-cp -f scripts/icons/Trolltech.conf /root/.config/ #REMOVE FOR QT5
-cp -f scripts/rtxi.desktop /usr/share/applications/
 cp -f scripts/rtxi.desktop /usr/share/applications/
 chmod +x /usr/share/applications/rtxi.desktop
 cp -f rtxi.conf /etc/rtxi.conf
@@ -175,12 +208,6 @@ chmod -R g+w /home/RTXI
 cd /home/RTXI/
 git clone https://github.com/rtxi/rtxi.git
 mkdir modules
-cd modules
-# Just for fun...
-git clone https://github.com/rtxi/signal-generator.git
-git clone https://github.com/rtxi/sync.git
-git clone https://github.com/rtxi/neuron.git
-cd ../
 
 chown -R root.adm rtxi
 chmod g+s rtxi
@@ -205,7 +232,7 @@ sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 ###############################################################################
 cd ~/
 rm -r rtxi
-rm -r handy-scripts
+if [ "$RTXI_VERSION" == "2.0" ]; then rm -r handy-scripts; fi
 rm -r *.deb
 echo "" > /run/resolvconf/resolv.conf
 apt-get clean
