@@ -30,6 +30,12 @@ DYN=$DEPS/dynamo
 INCLUDES=$DEPS/rtxi_includes
 
 ###############################################################################
+# Enable deb-src and the universe/multiverse repositories. 
+###############################################################################
+add-apt-repository -s "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
+
+
+###############################################################################
 # Install package dependencies. (DO NOT UPGRADE EXISTING PACKAGES!)
 ###############################################################################
 

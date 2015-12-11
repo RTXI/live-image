@@ -23,7 +23,7 @@ RTXI_VERSION=2.1
 XENOMAI_VERSION=2.6.4
 KERNEL_VERSION=3.8.13
 UBUNTU_VERSION=14.04.3 # keep this updated!
-UBUNTU_FLAVOR=lubuntu
+UBUNTU_FLAVOR=ubuntu-gnome
 
 ROOT=$(pwd)
 BUILD=build_$(date +%F_%T)
@@ -69,12 +69,6 @@ sudo umount mnt/
 # Prepare to chroot into the extracted iso
 #sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf <-For non-ubuntu systems
 sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
-
-# Add deb-src urls
-sudo bash -c '
-grep "deb " edit/etc/apt/sources.list | while read -r line; do 
-	echo "$line" | sed -e "s/deb/deb-src/g" >> edit/etc/apt/sources.list; 
-done'
 
 # Copy pre-compiled RT kernel deb files from the deb_files/ folder
 sudo cp $ROOT/deb_files/*.deb edit/root/ 
