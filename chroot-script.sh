@@ -199,22 +199,48 @@ ldconfig
 # all users' home directories. 
 ###############################################################################
 
+# Edit permissions to make the directory accessible to all users in adm
 mkdir /home/RTXI
 chown root.adm /home/RTXI
 chmod g+s /home/RTXI
 chmod -R g+w /home/RTXI
 
-# Edit permissions to make the directory accessible to all users in adm
+# Create shared folders
 cd /home/RTXI/
 git clone https://github.com/rtxi/rtxi.git
 mkdir modules
 
-chown -R root.adm rtxi
-chmod g+s rtxi
-chmod -R g+w rtxi
+chown -R root.adm /home/RTXI/rtxi
+chmod g+s /home/RTXI/rtxi
+chmod -R g+w /home/RTXI/rtxi
 chown -R root.adm modules
 chmod g+s modules
 chmod -R g+w modules
+
+# Clone and install some modules
+mkdir /usr/local/lib/rtxi_modules
+cd /usr/local/lib/rtxi_modules
+git clone https://github.com/RTXI/module-installer.git
+git clone https://github.com/RTXI/analysis-tools.git
+git clone https://github.com/RTXI/iir-filter.git
+git clone https://github.com/RTXI/fir-window.git
+git clone https://github.com/RTXI/sync.git
+git clone https://github.com/RTXI/mimic-signal.git
+git clone https://github.com/RTXI/signal-generator.git
+git clone https://github.com/RTXI/ttl-pulses.git
+git clone https://github.com/RTXI/wave-maker.git
+git clone https://github.com/RTXI/noise-generator.git
+
+for dir in *; do
+	if [ -d "$dir" ]; then
+		cd "$dir"
+		make -j`nproc`
+		make install
+		make clean
+		git clean -xdf
+		cd ../
+	fi
+done
 
 # Create file in /etc/profile.d/ that will make the RTXI symlink at login
 echo 'if [ -d /home/RTXI ]; then
