@@ -226,8 +226,6 @@ chmod -R g+w modules
 # Clone and install some modules
 mkdir /usr/local/lib/rtxi_modules
 cd /usr/local/lib/rtxi_modules
-git clone https://github.com/RTXI/module-installer.git
-git clone https://github.com/RTXI/analysis-tools.git
 git clone https://github.com/RTXI/iir-filter.git
 git clone https://github.com/RTXI/fir-window.git
 git clone https://github.com/RTXI/sync.git
