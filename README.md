@@ -1,14 +1,16 @@
 ###Live Image
 
 Contained here are the secrets to spinning out an RTXI live CD. In future, this README will contain instructions for:  
- - [ ] Building the live CD from scratch.  
+ - [x] Building the live CD from scratch.  
  - [ ] Updating a downloaded CD.  
  - [ ] Editing an already-extracted live CD's chroot filesystem.  
 
 ####Building from scratch.  
 To build from scratch, you will need two things:  
  - An internet connection. 
- - \*.deb files from an already-compiled real-time kernel.  
+ - \*.deb files from an already-compiled, aufs-patched real-time kernel.  
+
+If you don't have deb files from an aufs-patched kernel, compile one using `install_rt_aufs_kernel.sh`. The script differs from the generic one in that it compiles a module for AUFS, which is needed for the live casper filesystem to work. You can follow along the generic custom install instructions on rtxi.org/install, except you want to compile a kernel for a generic processor architecture instead of the one specific to your machine.  
 
 #####1. Clone this repo. 
 ````
