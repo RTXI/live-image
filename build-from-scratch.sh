@@ -67,8 +67,11 @@ sudo umount mnt/
 ###############################################################################
 
 # Prepare to chroot into the extracted iso
-#sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf <-For non-ubuntu systems
-sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
+if [ $(lsb_release -is) == "Debian" ]; then
+	sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf
+elif [ $(lsb_release -is) == "Ubuntu" ]; then
+	sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
+fi
 
 # Copy pre-compiled RT kernel deb files from the deb_files/ folder
 sudo cp $ROOT/deb_files/*.deb edit/root/ 
