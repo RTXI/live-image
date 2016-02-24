@@ -27,24 +27,24 @@ fi
 
 # Export environment variables
 echo  "----->Setting up variables"
-export linux_version=3.8.13
-export linux_tree=/opt/linux-$linux_version
+export BASE=$(pwd)
+export LINUX_VERSION=3.8.13
+export LINUX_TREE=linux-$LINUX_VERSION
 
-export xenomai_version=2.6.4
-export xenomai_root=/opt/xenomai-$xenomai_version
+export XENOMAI_VERSION=2.6.4
+export XENOMAI_ROOT=xenomai-$XENOMAI_VERSION
 
-export aufs_version=3.8
-export aufs_root=/opt/aufs-$aufs_version
+export AUFS_VERSION=3.8
+export AUFS_ROOT=aufs-$AUFS_VERSION
 
-export scripts_dir=`pwd`
+export SCRIPTS_DIR=`pwd`
 
-export build_root=/opt/build
-export opt=/opt
+export BUILD_ROOT=build
 
-rm -rf $build_root
-rm -rf $linux_tree
-rm -rf $xenomai_root
-mkdir $build_root
+rm -rf $BUILD_ROOT
+rm -rf $LINUX_TREE
+rm -rf $XENOMAI_ROOT
+mkdir $BUILD_ROOT
 
 if [ $? -eq 0 ]; then
 	echo  "----->Environment configuration complete"
@@ -55,13 +55,13 @@ fi
 
 # Download essentials
 echo  "----->Downloading Linux kernel"
-cd $opt
-wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$linux_version.tar.bz2
-tar xf linux-$linux_version.tar.bz2
+cd $BASE
+wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$LINUX_VERSION.tar.bz2
+tar xf linux-$LINUX_VERSION.tar.bz2
 
 echo  "----->Downloading Xenomai"
-wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$xenomai_version.tar.bz2
-tar xf xenomai-$xenomai_version.tar.bz2
+wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
+tar xf xenomai-$XENOMAI_VERSION.tar.bz2
 
 if [ $? -eq 0 ]; then
 	echo  "----->Downloads complete"
@@ -72,24 +72,24 @@ fi
 
 # Patch kernel
 echo  "----->Patching aufs kernel"
-cd $opt
-git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs-$aufs_version
-cd $aufs_root
-git checkout origin/aufs$aufs_version
-cd $linux_tree
-patch -p1 < $aufs_root/aufs3-kbuild.patch && \
-patch -p1 < $aufs_root/aufs3-base.patch && \
-patch -p1 < $aufs_root/aufs3-mmap.patch && \
-patch -p1 < $aufs_root/aufs3-standalone.patch
-cp -r $aufs_root/Documentation $linux_tree
-cp -r $aufs_root/fs $linux_tree
-cp $aufs_root/include/uapi/linux/aufs_type.h $linux_tree/include/uapi/linux/
-cp $aufs_root/include/uapi/linux/aufs_type.h $linux_tree/include/linux/
+cd $BASE
+git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs-$AUFS_VERSION
+cd $AUFS_ROOT
+git checkout origin/aufs$AUFS_VERSION
+cd $LINUX_TREE
+patch -p1 < $AUFS_ROOT/aufs3-kbuild.patch && \
+patch -p1 < $AUFS_ROOT/aufs3-base.patch && \
+patch -p1 < $AUFS_ROOT/aufs3-mmap.patch && \
+patch -p1 < $AUFS_ROOT/aufs3-standalone.patch
+cp -r $AUFS_ROOT/Documentation $LINUX_TREE
+cp -r $AUFS_ROOT/fs $LINUX_TREE
+cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
+cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 
 echo  "----->Patching xenomai onto kernel"
-cd $linux_tree
-cp -vi /boot/config-`uname -r` $linux_tree/.config
-$xenomai_root/scripts/prepare-kernel.sh --arch=x86 --adeos=$xenomai_root/ksrc/arch/x86/patches/ipipe-core-$linux_version-x86-*.patch --linux=$linux_tree
+cd $LINUX_TREE
+cp -vi /boot/config-`uname -r` $LINUX_TREE/.config
+$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/ksrc/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-*.patch --linux=$LINUX_TREE
 yes "" | make oldconfig
 make menuconfig
 
@@ -102,9 +102,9 @@ fi
 
 # Compile kernel
 echo  "----->Compiling kernel"
-cd $linux_tree
+cd $LINUX_TREE
 export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
-fakeroot make-kpkg --initrd --append-to-version=-xenomai-$xenomai_version-aufs --revision $(date +%Y%m%d) kernel-image kernel-headers modules
+fakeroot make-kpkg --initrd --append-to-version=-xenomai-$XENOMAI_VERSION-aufs --revision $(date +%Y%m%d) kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
 	echo  "----->Kernel compilation complete."
@@ -115,7 +115,7 @@ fi
 
 # Install compiled kernel
 echo  "----->Installing compiled kernel"
-cd $opt
+cd $BASE
 sudo dpkg -i linux-image-*.deb
 sudo dpkg -i linux-headers-*.deb
 
@@ -128,8 +128,8 @@ fi
 
 # Update
 echo  "----->Updating boot loader about the new kernel"
-cd $linux_tree
-sudo update-initramfs -c -k $linux_version-xenomai-$xenomai_version-aufs
+cd $LINUX_TREE
+sudo update-initramfs -c -k $LINUX_VERSION-xenomai-$XENOMAI_VERSION-aufs
 sudo update-grub
 
 if [ $? -eq 0 ]; then
@@ -141,8 +141,8 @@ fi
 
 # Install user libraries
 echo  "----->Installing user libraries"
-cd $build_root
-$xenomai_root/configure --enable-shared --enable-smp --enable-x86-sep
+cd $BUILD_ROOT
+$XENOMAI_ROOT/configure --enable-shared --enable-smp --enable-x86-sep
 make -s
 sudo make install
 
