@@ -113,58 +113,60 @@ else
 	exit
 fi
 
-# Install compiled kernel
-echo  "----->Installing compiled kernel"
-cd $BASE
-sudo dpkg -i linux-image-*.deb
-sudo dpkg -i linux-headers-*.deb
+exit
 
-if [ $? -eq 0 ]; then
-	echo  "----->Kernel installation complete"
-else
-	echo  "----->Kernel installation failed"
-	exit
-fi
-
-# Update
-echo  "----->Updating boot loader about the new kernel"
-cd $LINUX_TREE
-sudo update-initramfs -c -k $LINUX_VERSION-xenomai-$XENOMAI_VERSION-aufs
-sudo update-grub
-
-if [ $? -eq 0 ]; then
-	echo  "----->Boot loader update complete"
-else
-	echo  "----->Boot loader update failed"
-	exit
-fi
-
-# Install user libraries
-echo  "----->Installing user libraries"
-cd $BUILD_ROOT
-$XENOMAI_ROOT/configure --enable-shared --enable-smp --enable-x86-sep
-make -s
-sudo make install
-
-if [ $? -eq 0 ]; then
-	echo  "----->User library installation complete"
-else
-	echo  "----->User library installation failed"
-	exit
-fi
-
-# Setting up user permissions
-echo  "----->Setting up user/group"
-sudo groupadd xenomai
-sudo usermod -aG xenomai `whoami`
-
-if [ $? -eq 0 ]; then
-	echo  "----->Group setup complete"
-else
-	echo  "----->Group setup failed"
-	exit
-fi
-
-# Restart
-echo  "----->Kernel patch complete."
-echo  "----->Reboot to boot into RT kernel."
+## Install compiled kernel
+#echo  "----->Installing compiled kernel"
+#cd $BASE
+#sudo dpkg -i linux-image-*.deb
+#sudo dpkg -i linux-headers-*.deb
+#
+#if [ $? -eq 0 ]; then
+#	echo  "----->Kernel installation complete"
+#else
+#	echo  "----->Kernel installation failed"
+#	exit
+#fi
+#
+## Update
+#echo  "----->Updating boot loader about the new kernel"
+#cd $LINUX_TREE
+#sudo update-initramfs -c -k $LINUX_VERSION-xenomai-$XENOMAI_VERSION-aufs
+#sudo update-grub
+#
+#if [ $? -eq 0 ]; then
+#	echo  "----->Boot loader update complete"
+#else
+#	echo  "----->Boot loader update failed"
+#	exit
+#fi
+#
+## Install user libraries
+#echo  "----->Installing user libraries"
+#cd $BUILD_ROOT
+#$XENOMAI_ROOT/configure --enable-shared --enable-smp --enable-x86-sep
+#make -s
+#sudo make install
+#
+#if [ $? -eq 0 ]; then
+#	echo  "----->User library installation complete"
+#else
+#	echo  "----->User library installation failed"
+#	exit
+#fi
+#
+## Setting up user permissions
+#echo  "----->Setting up user/group"
+#sudo groupadd xenomai
+#sudo usermod -aG xenomai `whoami`
+#
+#if [ $? -eq 0 ]; then
+#	echo  "----->Group setup complete"
+#else
+#	echo  "----->Group setup failed"
+#	exit
+#fi
+#
+## Restart
+#echo  "----->Kernel patch complete."
+#echo  "----->Reboot to boot into RT kernel."
