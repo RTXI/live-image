@@ -29,17 +29,17 @@ fi
 echo  "----->Setting up variables"
 export BASE=$(pwd)
 export LINUX_VERSION=3.8.13
-export LINUX_TREE=linux-$LINUX_VERSION
+export LINUX_TREE=$BASE/linux-$LINUX_VERSION
 
 export XENOMAI_VERSION=2.6.4
-export XENOMAI_ROOT=xenomai-$XENOMAI_VERSION
+export XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
 
 export AUFS_VERSION=3.8
-export AUFS_ROOT=aufs-$AUFS_VERSION
+export AUFS_ROOT=$BASE/aufs-$AUFS_VERSION
 
 export SCRIPTS_DIR=`pwd`
 
-export BUILD_ROOT=build
+export BUILD_ROOT=$BASE/build
 
 rm -rf $BUILD_ROOT
 rm -rf $LINUX_TREE
@@ -70,7 +70,12 @@ else
 	exit
 fi
 
-# Patch kernel
+# Download kernel config
+#wget --no-check-certificate http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.14.17-utopic/linux-image-3.14.17-031417-generic_3.14.17-031417.201408132253_amd64.deb
+#dpkg-deb -x linux-image-3.14.17-031417-generic_3.14.17-031417.201408132253_amd64.deb linux-image
+#cp linux-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
+
+# Patch AUFS
 echo  "----->Patching aufs kernel"
 cd $BASE
 git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs-$AUFS_VERSION
@@ -86,9 +91,9 @@ cp -r $AUFS_ROOT/fs $LINUX_TREE
 cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
 cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 
+# Patch Xenomai
 echo  "----->Patching xenomai onto kernel"
 cd $LINUX_TREE
-cp -vi /boot/config-`uname -r` $LINUX_TREE/.config
 $XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/ksrc/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-*.patch --linux=$LINUX_TREE
 yes "" | make oldconfig
 make menuconfig
@@ -103,7 +108,7 @@ fi
 # Compile kernel
 echo  "----->Compiling kernel"
 cd $LINUX_TREE
-export CONCURRENCY_LEVEL=$(grep -c ^processor /proc/cpuinfo)
+export CONCURRENCY_LEVEL=$(nproc)
 fakeroot make-kpkg --initrd --append-to-version=-xenomai-$XENOMAI_VERSION-aufs --revision $(date +%Y%m%d) kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
@@ -113,60 +118,58 @@ else
 	exit
 fi
 
-exit
+# Install compiled kernel
+echo  "----->Installing compiled kernel"
+cd $BASE
+sudo dpkg -i linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb
+sudo dpkg -i linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb
 
-## Install compiled kernel
-#echo  "----->Installing compiled kernel"
-#cd $BASE
-#sudo dpkg -i linux-image-*.deb
-#sudo dpkg -i linux-headers-*.deb
-#
-#if [ $? -eq 0 ]; then
-#	echo  "----->Kernel installation complete"
-#else
-#	echo  "----->Kernel installation failed"
-#	exit
-#fi
-#
-## Update
-#echo  "----->Updating boot loader about the new kernel"
-#cd $LINUX_TREE
-#sudo update-initramfs -c -k $LINUX_VERSION-xenomai-$XENOMAI_VERSION-aufs
-#sudo update-grub
-#
-#if [ $? -eq 0 ]; then
-#	echo  "----->Boot loader update complete"
-#else
-#	echo  "----->Boot loader update failed"
-#	exit
-#fi
-#
-## Install user libraries
-#echo  "----->Installing user libraries"
-#cd $BUILD_ROOT
-#$XENOMAI_ROOT/configure --enable-shared --enable-smp --enable-x86-sep
-#make -s
-#sudo make install
-#
-#if [ $? -eq 0 ]; then
-#	echo  "----->User library installation complete"
-#else
-#	echo  "----->User library installation failed"
-#	exit
-#fi
-#
-## Setting up user permissions
-#echo  "----->Setting up user/group"
-#sudo groupadd xenomai
-#sudo usermod -aG xenomai `whoami`
-#
-#if [ $? -eq 0 ]; then
-#	echo  "----->Group setup complete"
-#else
-#	echo  "----->Group setup failed"
-#	exit
-#fi
-#
-## Restart
-#echo  "----->Kernel patch complete."
-#echo  "----->Reboot to boot into RT kernel."
+if [ $? -eq 0 ]; then
+	echo  "----->Kernel installation complete"
+else
+	echo  "----->Kernel installation failed"
+	exit
+fi
+
+# Update
+echo  "----->Updating boot loader about the new kernel"
+cd $LINUX_TREE
+sudo update-initramfs -c -k $LINUX_VERSION-xenomai-$XENOMAI_VERSION-aufs
+sudo update-grub
+
+if [ $? -eq 0 ]; then
+	echo  "----->Boot loader update complete"
+else
+	echo  "----->Boot loader update failed"
+	exit
+fi
+
+# Install user libraries
+echo  "----->Installing user libraries"
+cd $BUILD_ROOT
+$XENOMAI_ROOT/configure --enable-shared --enable-smp --enable-x86-sep
+make -s
+sudo make install
+
+if [ $? -eq 0 ]; then
+	echo  "----->User library installation complete"
+else
+	echo  "----->User library installation failed"
+	exit
+fi
+
+# Setting up user permissions
+echo  "----->Setting up user/group"
+sudo groupadd xenomai
+sudo usermod -aG xenomai `whoami`
+
+if [ $? -eq 0 ]; then
+	echo  "----->Group setup complete"
+else
+	echo  "----->Group setup failed"
+	exit
+fi
+
+# Restart
+echo  "----->Kernel patch complete."
+echo  "----->Reboot to boot into RT kernel."
