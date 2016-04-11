@@ -31,7 +31,9 @@ fi
 
 echo  "----->Setting up variables"
 
-BASE=/opt/
+BASE=/opt
+SCRIPT_DIR=$(pwd)
+
 LINUX_VERSION=4.1.18
 LINUX_TREE=$BASE/linux-$LINUX_VERSION
 LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_amd64.deb"
@@ -44,7 +46,7 @@ AUFS_ROOT=$BASE/aufs-$AUFS_VERSION
 
 BUILD_ROOT=$BASE/build
 
-DEB_FILES=$BASE/deb_files/
+DEB_FILES=$SCRIPT_DIR/deb_files
 
 rm -rf $BUILD_ROOT
 rm -rf $LINUX_TREE
@@ -195,8 +197,8 @@ else
 	exit
 fi
 
-cp linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
-cp linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
+cp $BASE/linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
+cp $BASE/linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
 
 
 ################################################################################
