@@ -31,7 +31,7 @@ fi
 ################################################################################
 echo  "----->Setting up variables"
 
-BASE=$(pwd)
+BASE=/opt/
 LINUX_VERSION=4.1.18
 LINUX_TREE=$BASE/linux-$LINUX_VERSION
 
@@ -63,9 +63,9 @@ fi
 echo  "----->Downloading Linux kernel"
 cd $BASE
 if [[ "$LINUX_VERSION" =~ "3." ]]; then 
-	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$LINUX_VERSION.tar.xz
+	wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-$LINUX_VERSION.tar.xz
 elif [[ "$LINUX_VERSION" =~ "4." ]]; then
-	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v4.x/linux-$LINUX_VERSION.tar.xz
+	wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$LINUX_VERSION.tar.xz
 else
 	echo "Kernel specified in the \$LINUX_VERSION variable needs to be 3.x or 4.x"
 	exit 1
@@ -73,7 +73,7 @@ fi
 tar xf linux-$LINUX_VERSION.tar.xz
 
 echo  "----->Downloading Xenomai"
-wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
+wget https://xenomai.org/downloads/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
 tar xf xenomai-$XENOMAI_VERSION.tar.bz2
 
 if [ $? -eq 0 ]; then
