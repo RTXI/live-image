@@ -94,9 +94,8 @@ apt-get -y build-dep linux
 
 if [ "$RTXI_VERSION" == "2.0" ]; then
 	cd $DEPS
-	wget --no-check-certificate https://cran.r-project.org/src/contrib/Archive/gridExtra/gridExtra_0.9.1.tar.gz
-	tar xf gridExtra_0.9.1.tar.gz
-	R CMD INSTALL gridExtra
+	wget https://cran.r-project.org/src/contrib/Archive/gridExtra/gridExtra_0.9.1.tar.gz
+	R CMD INSTALL gridExtra_0.9.1.tar.gz
 fi
 
 ###############################################################################

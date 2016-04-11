@@ -56,7 +56,7 @@ fi
 
 # Get started and extract the iso
 mkdir mnt extract
-sudo mount -o loop *.iso mnt/
+sudo mount -o loop $UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso mnt/
 sudo rsync --exclude=/casper/filesystem.squashfs -a mnt/ extract
 sudo unsquashfs mnt/casper/filesystem.squashfs
 mv squashfs-root edit
@@ -66,7 +66,8 @@ sudo umount mnt/
 # Prepare the chroot environment. 
 ###############################################################################
 
-# Prepare to chroot into the extracted iso
+# Copy over the network configuration file. It's in different places in 
+# different distros.
 if [ $(lsb_release -is) == "Debian" ]; then
 	sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf
 elif [ $(lsb_release -is) == "Ubuntu" ]; then
