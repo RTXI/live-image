@@ -21,25 +21,28 @@
 #
 
 if ! id | grep -q root; then
-  echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
+	echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
 	exit
 fi
 
-# Export environment variables
+################################################################################
+# Export environment variables. The kernel will be downloaded and build in the 
+# directory where this script is run. 
+################################################################################
 echo  "----->Setting up variables"
-export BASE=$(pwd)
-export LINUX_VERSION=3.8.13
-export LINUX_TREE=$BASE/linux-$LINUX_VERSION
 
-export XENOMAI_VERSION=2.6.4
-export XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
+BASE=$(pwd)
+LINUX_VERSION=4.1.18
+LINUX_TREE=$BASE/linux-$LINUX_VERSION
 
-export AUFS_VERSION=3.8
-export AUFS_ROOT=$BASE/aufs-$AUFS_VERSION
+XENOMAI_VERSION=3.0.2
+XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
 
-export SCRIPTS_DIR=`pwd`
+AUFS_VERSION=4.1
+AUFS_ROOT=$BASE/aufs-$AUFS_VERSION
 
-export BUILD_ROOT=$BASE/build
+SCRIPTS_DIR=`pwd`
+BUILD_ROOT=$BASE/build
 
 rm -rf $BUILD_ROOT
 rm -rf $LINUX_TREE
@@ -53,11 +56,20 @@ else
 	exit
 fi
 
-# Download essentials
+################################################################################
+# Download all software needed to patch a real-time, aufs-enabled kernel. 
+################################################################################
 echo  "----->Downloading Linux kernel"
 cd $BASE
-wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$LINUX_VERSION.tar.bz2
-tar xf linux-$LINUX_VERSION.tar.bz2
+if [[ "$LINUX_VERSION" =~ "3." ]]; then 
+	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v3.x/linux-$LINUX_VERSION.tar.xz
+elif [[ "$LINUX_VERSION" =~ "4." ]]; then
+	wget --no-check-certificate https://www.kernel.org/pub/linux/kernel/v4.x/linux-$LINUX_VERSION.tar.xz
+else
+	echo "Kernel specified in the \$LINUX_VERSION variable needs to be 3.x or 4.x"
+	exit 1
+fi
+tar xf linux-$LINUX_VERSION.tar.xz
 
 echo  "----->Downloading Xenomai"
 wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
@@ -74,11 +86,27 @@ fi
 #wget --no-check-certificate http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.14.17-utopic/linux-image-3.14.17-031417-generic_3.14.17-031417.201408132253_amd64.deb
 #dpkg-deb -x linux-image-3.14.17-031417-generic_3.14.17-031417.201408132253_amd64.deb linux-image
 #cp linux-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
+wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_amd64.deb
+dpkg-deb -x linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_amd64.deb linux-$LINUX_VERSION-image
+cp linux-$LINUX_VERSION-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
 
-# Patch AUFS
+#cp /boot/config-$(uname -r) $LINUX_TREE/.config # needs work.
+
+################################################################################
+# Patch Aufs. Aufs enables the kernel to be booted in a live environment. 
+# Without it, the live CD would be unusable. 
+################################################################################
 echo  "----->Patching aufs kernel"
 cd $BASE
-git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs-$AUFS_VERSION
+if [[ "$AUFS_VERSION" =~ "3." ]]; then 
+	git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs-$AUFS_VERSION
+elif [[ "$AUFS_VERSION" =~ "4." ]]; then
+	git clone git://github.com/sfjro/aufs4-standalone.git aufs-$AUFS_VERSION
+else
+	echo "Aufs version specified in the \$AUFS_VERSION variable needs to be 3.x or 4.x"
+	exit 1
+fi
+
 cd $AUFS_ROOT
 git checkout origin/aufs$AUFS_VERSION
 cd $LINUX_TREE
@@ -91,10 +119,29 @@ cp -r $AUFS_ROOT/fs $LINUX_TREE
 cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
 cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 
-# Patch Xenomai
+################################################################################
+# Patch Xenomai 2 or 3. The script will detect the version and prepare the 
+# kernel as needed. 
+################################################################################
 echo  "----->Patching xenomai onto kernel"
 cd $LINUX_TREE
-$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/ksrc/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-*.patch --linux=$LINUX_TREE
+if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
+	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/ksrc/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-?.patch --linux=$LINUX_TREE
+elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
+	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/kernel/cobalt/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-?.patch --linux=$LINUX_TREE
+else
+	echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
+	exit 1
+fi
+
+################################################################################
+# Compile the kernel. The menuconfig options are the same as for a standard RT 
+# kernel, except that you need to enable the Aufs module: 
+# 
+# Filesystems ->
+#   Miscellaneous Filesystems ->
+#     [M] Aufs
+################################################################################
 yes "" | make oldconfig
 make menuconfig
 
@@ -105,7 +152,6 @@ else
 	exit
 fi
 
-# Compile kernel
 echo  "----->Compiling kernel"
 cd $LINUX_TREE
 export CONCURRENCY_LEVEL=$(nproc)
@@ -118,7 +164,14 @@ else
 	exit
 fi
 
-# Install compiled kernel
+################################################################################
+# All you need to do for a live CD is have a compiled kernel. You don't need to 
+# install it on your own computer. If you want to anyway, delete the exit 
+# command and let the code below run. 
+################################################################################
+
+exit 0  # Delete this line to continue. 
+
 echo  "----->Installing compiled kernel"
 cd $BASE
 sudo dpkg -i linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb
@@ -131,7 +184,6 @@ else
 	exit
 fi
 
-# Update
 echo  "----->Updating boot loader about the new kernel"
 cd $LINUX_TREE
 sudo update-initramfs -c -k $LINUX_VERSION-xenomai-$XENOMAI_VERSION-aufs
@@ -144,10 +196,19 @@ else
 	exit
 fi
 
-# Install user libraries
+exit
+
+# Install Xenomai libraries. 
 echo  "----->Installing user libraries"
 cd $BUILD_ROOT
-$XENOMAI_ROOT/configure --enable-shared --enable-smp --enable-x86-sep
+if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
+	$XENOMAI_ROOT/configure --enable-shared --enable-smp --enable-x86-sep
+elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
+	$XENOMAI_ROOT/configure --with-core=cobalt --enable-pshared --enable-smp --enable-x86-vsyscall --enable-dlopen-libs
+else
+	echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
+	exit 1
+fi
 make -s
 sudo make install
 
@@ -155,18 +216,6 @@ if [ $? -eq 0 ]; then
 	echo  "----->User library installation complete"
 else
 	echo  "----->User library installation failed"
-	exit
-fi
-
-# Setting up user permissions
-echo  "----->Setting up user/group"
-sudo groupadd xenomai
-sudo usermod -aG xenomai `whoami`
-
-if [ $? -eq 0 ]; then
-	echo  "----->Group setup complete"
-else
-	echo  "----->Group setup failed"
 	exit
 fi
 
