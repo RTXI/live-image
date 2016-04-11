@@ -20,8 +20,8 @@ sudo apt-get -y install genisoimage squashfs-tools syslinux
 ###############################################################################
 
 RTXI_VERSION=2.1
-XENOMAI_VERSION=2.6.4
-KERNEL_VERSION=3.8.13
+XENOMAI_VERSION=3.0.2
+KERNEL_VERSION=4.1.18
 UBUNTU_VERSION=14.04.4 # keep this updated!
 UBUNTU_FLAVOR=ubuntu-gnome
 
@@ -43,9 +43,9 @@ mkdir ${BUILD}
 cd ${BUILD}
 
 if [ "$UBUNTU_FLAVOR" = "ubuntu" ]; then
-	wget --no-check-certificate http://releases.ubuntu.com/$UBUNTU_VERSION/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
+	wget http://releases.ubuntu.com/$UBUNTU_VERSION/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 else
-	wget --no-check-certificate http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/trusty/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
+	wget http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/trusty/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 fi
 
 EXIT_STATUS=$?

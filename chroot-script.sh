@@ -15,9 +15,13 @@ export LC_ALL=C
 ###############################################################################
 
 RTXI_VERSION=2.1
-XENOMAI_VERSION=2.6.4
-KERNEL_VERSION=3.8.13
-QWT_VERSION=6.1.2 # v6.1.0 for RTXI v2.0
+XENOMAI_VERSION=3.0.2
+KERNEL_VERSION=4.1.18
+if [ "RTXI_VERSION" == "2.1" ]; then
+	QWT_VERSION=6.1.2 
+elif [ "RTXI_VERSION" == "2.0" ]; then
+	QWT_VERSION=6.1.0 
+fi
 
 cd $HOME
 
@@ -47,7 +51,11 @@ apt-get -y install git
 if [ "$RTXI_VERSION" == "2.1" ]; then
 	git clone https://github.com/rtxi/rtxi
 	cd rtxi
-	git checkout qt5
+	if [[ "XENOMAI_VERSION" ~= "3." ]]; then
+		git checkout rttweak
+	elif [[ "XENOMAI_VERSION" ~= "2.6." ]]; then
+		git checkout qt5
+	fi
 	apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
 	                   gdb fakeroot crash kexec-tools makedumpfile \
 	                   kernel-wedge libncurses5-dev libelf-dev binutils-dev \
@@ -158,12 +166,20 @@ gdebi -n linux-headers*.deb
 
 # Code goes here. 
 cd $DEPS
-mkdir build
-wget --no-check-certificate http://download.gna.org/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
+wget https://xenomai.org/downloads/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
 tar xf xenomai-$XENOMAI_VERSION.tar.bz2
 
+mkdir build
 cd build
-../xenomai-$XENOMAI_VERSION/configure --enable-shared --enable-smp --enable-x86-sep
+if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then
+   ../xenomai-$XENOMAI_VERSION/configure --enable-shared --enable-smp --enable-x86-sep
+elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
+   ../xenomai-$XENOMAI_VERSION/configure --with-core=cobalt --enable-pshared --enable-smp --enable-x86-vsyscall --enable-dlopen-libs
+else
+   echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
+   exit 1
+fi
+
 make -s
 make install
 
