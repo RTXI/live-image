@@ -35,6 +35,7 @@ echo  "----->Setting up variables"
 BASE=/opt/
 LINUX_VERSION=4.1.18
 LINUX_TREE=$BASE/linux-$LINUX_VERSION
+LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_amd64.deb"
 
 XENOMAI_VERSION=3.0.2
 XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
@@ -93,14 +94,19 @@ else
 fi
 
 # Download kernel config
-#wget --no-check-certificate http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.14.17-utopic/linux-image-3.14.17-031417-generic_3.14.17-031417.201408132253_amd64.deb
-#dpkg-deb -x linux-image-3.14.17-031417-generic_3.14.17-031417.201408132253_amd64.deb linux-image
-#cp linux-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
-wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_amd64.deb
-dpkg-deb -x linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_amd64.deb linux-$LINUX_VERSION-image
-cp linux-$LINUX_VERSION-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
-
-#cp /boot/config-$(uname -r) $LINUX_TREE/.config # needs work.
+if [ "$LINUX_CONFIG_URL" != "" ]; then
+	wget $LINUX_CONFIG_URL
+	if [ $? -eq 0 ]; then
+		dpkg-deb -x ${LINUX_CONFIG_URL##*/} linux-$LINUX_VERSION-image
+		cp linux-$LINUX_VERSION-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
+	else
+		echo "wget failed to get $LINUX_CONFIG_URL"
+		echo "   defaulting to /boot/config-$(uname -r)"
+		cp /boot/config-$(uname -r) $LINUX_TREE/.config 
+	fi
+else
+	cp /boot/config-$(uname -r) $LINUX_TREE/.config 
+fi
 
 
 ################################################################################
