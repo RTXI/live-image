@@ -63,9 +63,13 @@ fi
 echo  "----->Downloading Linux kernel"
 cd $BASE
 if [[ "$LINUX_VERSION" =~ "3." ]]; then 
-	wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-$LINUX_VERSION.tar.xz
+	if ! [ -f "linux-$LINUX_VERSION.tar.xz" ]; then
+		wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-$LINUX_VERSION.tar.xz
+	fi
 elif [[ "$LINUX_VERSION" =~ "4." ]]; then
-	wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$LINUX_VERSION.tar.xz
+	if ! [ -f "linux-$LINUX_VERSION.tar.xz" ]; then
+		wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$LINUX_VERSION.tar.xz
+	fi
 else
 	echo "Kernel specified in the \$LINUX_VERSION variable needs to be 3.x or 4.x"
 	exit 1
@@ -73,7 +77,9 @@ fi
 tar xf linux-$LINUX_VERSION.tar.xz
 
 echo  "----->Downloading Xenomai"
-wget https://xenomai.org/downloads/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
+if ! [ -f "xenomai-$XENOMAI_VERSION.tar.bz2" ]; then
+	wget https://xenomai.org/downloads/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
+fi
 tar xf xenomai-$XENOMAI_VERSION.tar.bz2
 
 if [ $? -eq 0 ]; then
