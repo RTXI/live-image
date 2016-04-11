@@ -178,8 +178,8 @@ exit 0  # Delete this line to continue.
 
 echo  "----->Installing compiled kernel"
 cd $BASE
-sudo dpkg -i linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb
-sudo dpkg -i linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb
+dpkg -i linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb
+dpkg -i linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb
 
 if [ $? -eq 0 ]; then
 	echo  "----->Kernel installation complete"
@@ -190,8 +190,8 @@ fi
 
 echo  "----->Updating boot loader about the new kernel"
 cd $LINUX_TREE
-sudo update-initramfs -c -k $LINUX_VERSION-xenomai-$XENOMAI_VERSION-aufs
-sudo update-grub
+update-initramfs -c -k $LINUX_VERSION-xenomai-$XENOMAI_VERSION-aufs
+update-grub
 
 if [ $? -eq 0 ]; then
 	echo  "----->Boot loader update complete"
@@ -214,7 +214,7 @@ else
 	exit 1
 fi
 make -s
-sudo make install
+make install
 
 if [ $? -eq 0 ]; then
 	echo  "----->User library installation complete"
