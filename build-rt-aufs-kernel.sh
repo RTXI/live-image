@@ -26,8 +26,7 @@ fi
 
 
 ################################################################################
-# Export environment variables. The kernel will be downloaded and build in the 
-# directory where this script is run. 
+# Export environment variables. The kernel will be downloaded and built in BASE. 
 ################################################################################
 
 echo  "----->Setting up variables"
