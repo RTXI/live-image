@@ -41,8 +41,9 @@ XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
 AUFS_VERSION=4.1
 AUFS_ROOT=$BASE/aufs-$AUFS_VERSION
 
-SCRIPTS_DIR=`pwd`
 BUILD_ROOT=$BASE/build
+
+DEB_FILES=$BASE/deb_files/
 
 rm -rf $BUILD_ROOT
 rm -rf $LINUX_TREE
@@ -163,6 +164,9 @@ else
 	echo  "----->Kernel compilation failed."
 	exit
 fi
+
+cp linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
+cp linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
 
 ################################################################################
 # All you need to do for a live CD is have a compiled kernel. You don't need to 
