@@ -112,24 +112,34 @@ echo  "----->Patching aufs kernel"
 cd $BASE
 if [[ "$AUFS_VERSION" =~ "3." ]]; then 
 	git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs-$AUFS_VERSION
+	cd $AUFS_ROOT
+	git checkout origin/aufs$AUFS_VERSION
+	cd $LINUX_TREE
+	patch -p1 < $AUFS_ROOT/aufs3-kbuild.patch && \
+	patch -p1 < $AUFS_ROOT/aufs3-base.patch && \
+	patch -p1 < $AUFS_ROOT/aufs3-mmap.patch && \
+	patch -p1 < $AUFS_ROOT/aufs3-standalone.patch
+	cp -r $AUFS_ROOT/Documentation $LINUX_TREE
+	cp -r $AUFS_ROOT/fs $LINUX_TREE
+	cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
+	cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 elif [[ "$AUFS_VERSION" =~ "4." ]]; then
 	git clone git://github.com/sfjro/aufs4-standalone.git aufs-$AUFS_VERSION
+	cd $AUFS_ROOT
+	git checkout origin/aufs$AUFS_VERSION
+	cd $LINUX_TREE
+	patch -p1 < $AUFS_ROOT/aufs4-kbuild.patch && \
+	patch -p1 < $AUFS_ROOT/aufs4-base.patch && \
+	patch -p1 < $AUFS_ROOT/aufs4-mmap.patch && \
+	patch -p1 < $AUFS_ROOT/aufs4-standalone.patch
+	cp -r $AUFS_ROOT/Documentation $LINUX_TREE
+	cp -r $AUFS_ROOT/fs $LINUX_TREE
+	cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
+	cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 else
 	echo "Aufs version specified in the \$AUFS_VERSION variable needs to be 3.x or 4.x"
 	exit 1
 fi
-
-cd $AUFS_ROOT
-git checkout origin/aufs$AUFS_VERSION
-cd $LINUX_TREE
-patch -p1 < $AUFS_ROOT/aufs3-kbuild.patch && \
-patch -p1 < $AUFS_ROOT/aufs3-base.patch && \
-patch -p1 < $AUFS_ROOT/aufs3-mmap.patch && \
-patch -p1 < $AUFS_ROOT/aufs3-standalone.patch
-cp -r $AUFS_ROOT/Documentation $LINUX_TREE
-cp -r $AUFS_ROOT/fs $LINUX_TREE
-cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
-cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 
 
 ################################################################################
