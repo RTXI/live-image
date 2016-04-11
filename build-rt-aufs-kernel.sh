@@ -1,34 +1,35 @@
 #!/bin/bash
 
-#
+################################################################################
 # The Real-Time eXperiment Interface (RTXI)
-# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill Cornell Medical College
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill 
+# Cornell Medical College
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# This program is free software: you can redistribute it and/or modify it under 
+# the terms of the GNU General Public License as published by the Free Software 
+# Foundation, either version 3 of the License, or (at your option) any later 
+# version.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful, but WITHOUT 
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+# details.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-#	Created by Yogi Patel <yapatel@gatech.edu> 2014.1.31
-#
+# You should have received a copy of the GNU General Public License along with 
+# this program.  If not, see <http://www.gnu.org/licenses/>.
+################################################################################
 
 if ! id | grep -q root; then
 	echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
 	exit
 fi
 
+
 ################################################################################
 # Export environment variables. The kernel will be downloaded and build in the 
 # directory where this script is run. 
 ################################################################################
+
 echo  "----->Setting up variables"
 
 BASE=/opt/
@@ -57,9 +58,11 @@ else
 	exit
 fi
 
+
 ################################################################################
 # Download all software needed to patch a real-time, aufs-enabled kernel. 
 ################################################################################
+
 echo  "----->Downloading Linux kernel"
 cd $BASE
 if [[ "$LINUX_VERSION" =~ "3." ]]; then 
@@ -99,10 +102,12 @@ cp linux-$LINUX_VERSION-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
 
 #cp /boot/config-$(uname -r) $LINUX_TREE/.config # needs work.
 
+
 ################################################################################
 # Patch Aufs. Aufs enables the kernel to be booted in a live environment. 
 # Without it, the live CD would be unusable. 
 ################################################################################
+
 echo  "----->Patching aufs kernel"
 cd $BASE
 if [[ "$AUFS_VERSION" =~ "3." ]]; then 
@@ -126,10 +131,12 @@ cp -r $AUFS_ROOT/fs $LINUX_TREE
 cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
 cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 
+
 ################################################################################
 # Patch Xenomai 2 or 3. The script will detect the version and prepare the 
 # kernel as needed. 
 ################################################################################
+
 echo  "----->Patching xenomai onto kernel"
 cd $LINUX_TREE
 if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
@@ -141,6 +148,7 @@ else
 	exit 1
 fi
 
+
 ################################################################################
 # Compile the kernel. The menuconfig options are the same as for a standard RT 
 # kernel, except that you need to enable the Aufs module: 
@@ -149,6 +157,7 @@ fi
 #   Miscellaneous Filesystems ->
 #     [M] Aufs
 ################################################################################
+
 yes "" | make oldconfig
 make menuconfig
 
@@ -173,6 +182,7 @@ fi
 
 cp linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
 cp linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
+
 
 ################################################################################
 # All you need to do for a live CD is have a compiled kernel. You don't need to 
