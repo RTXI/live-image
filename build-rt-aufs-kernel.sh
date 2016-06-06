@@ -159,9 +159,9 @@ fi
 echo  "----->Patching xenomai onto kernel"
 cd $LINUX_TREE
 if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
-	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/ksrc/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-?.patch --linux=$LINUX_TREE
+	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/ksrc/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-[0-9]*.patch --linux=$LINUX_TREE
 elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
-	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/kernel/cobalt/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-?.patch --linux=$LINUX_TREE
+	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/kernel/cobalt/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-[0-9]*.patch --linux=$LINUX_TREE
 else
 	echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
 	exit 1
