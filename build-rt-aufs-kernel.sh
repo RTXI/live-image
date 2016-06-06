@@ -36,7 +36,9 @@ SCRIPT_DIR=$(pwd)
 
 LINUX_VERSION=4.1.18
 LINUX_TREE=$BASE/linux-$LINUX_VERSION
-LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_amd64.deb"
+
+ARCH=i386
+LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_$ARCH.deb"
 
 XENOMAI_VERSION=3.0.2
 XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
