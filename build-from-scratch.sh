@@ -47,10 +47,6 @@ UBUNTU_FLAVOR=ubuntu-gnome
 ROOT=$(pwd)
 BUILD=build_$(date +%F_%T)
 ARCH="amd64"
-#if [ "$(uname -m)" = "x86_64" ]; then
-#else
-#	ARCH="i386"
-#fi
 
 ###############################################################################
 # Download and extract a generic Ubuntu image. 
@@ -64,7 +60,7 @@ cd ${BUILD}
 if [ "$UBUNTU_FLAVOR" = "ubuntu" ]; then
 	wget http://releases.ubuntu.com/$UBUNTU_VERSION/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 else
-	wget http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/trusty/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
+	wget http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/$UBUNTU_VERSION/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 fi
 
 EXIT_STATUS=$?
