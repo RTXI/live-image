@@ -36,9 +36,9 @@ export LC_ALL=C
 RTXI_VERSION=2.1
 XENOMAI_VERSION=3.0.2
 KERNEL_VERSION=4.1.18
-if [ "RTXI_VERSION" == "2.1" ]; then
+if [ "$RTXI_VERSION" == "2.1" ]; then
 	QWT_VERSION=6.1.2 
-elif [ "RTXI_VERSION" == "2.0" ]; then
+elif [ "$RTXI_VERSION" == "2.0" ]; then
 	QWT_VERSION=6.1.0 
 fi
 
