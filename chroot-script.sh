@@ -80,10 +80,6 @@ apt-get -y install git
 git clone https://github.com/rtxi/rtxi
 cd rtxi
 
-# set Qt style to gtk
-awk '/.*QApplication \*app = new QApplication\(argc,argv\);.*/ { print; print "    app->setStyle\(\"gtk\"\);"; next }1' src/main.cpp
-
-
 if [ "$RTXI_VERSION" == "2.1" ]; then
 	if test `echo "$XENOMAI_VERSION" | grep -c "3."` -ne 0; then
 		git checkout rttweak
@@ -113,6 +109,10 @@ else
 	echo "Invalid RTXI version set"
 	exit
 fi
+
+# set Qt style to gtk
+awk '/.*QApplication \*app = new QApplication\(argc,argv\);.*/ { print; print "app->setStyle(\"gtk\");"; next }1' src/main.cpp > src/main.tmp
+mv src/main.tmp src/main.cpp
 	
 apt-get -y install -f
 
@@ -302,9 +302,11 @@ apt-get -y install zsh zsh-syntax-highlighting zsh-antigen
 
 cd ~/
 
+apt-get -y install libgtk-3-dev
+
 GLIB_OVERRIDE="/usr/share/glib-2.0/schemas/20_ubuntu-gnome-default-settings.gschema.override"
 
-if [[ "$UBUNTU_VERSION" ~= "16.04" ]]; then
+if test `echo "$UBUNTU_VERSION" | grep -c "16.04"` -ne 0; then
 	#apt-get -y install libgtk-3-dev ruby-bundler ruby-sass npm nodejs inkscape
 	#ln -s /usr/bin/nodejs /usr/bin/node
 	#npm -g install gulp grunt-cli bower
@@ -352,7 +354,7 @@ if [[ "$UBUNTU_VERSION" ~= "16.04" ]]; then
 	sed -i 's/^theme="Adwaita"/theme="Arc"/g' $GLIB_OVERRIDE
 	glib-compile-schemas /usr/share/glib-2.0/schemas/
 
-elif [[ "$UBUNTU_VERSION" ~= "14.04" ]]; then
+elif test `echo "$UBUNTU_VERSION" | grep -c "14.04"` -ne 0; then
 	# Install theme pack that includes Numix
 	apt-get -y install shimmer-themes
 
