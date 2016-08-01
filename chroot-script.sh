@@ -81,9 +81,9 @@ git clone https://github.com/rtxi/rtxi
 cd rtxi
 
 if [ "$RTXI_VERSION" == "2.1" ]; then
-	if [[ "XENOMAI_VERSION" ~= "3." ]]; then
+	if [[ "$XENOMAI_VERSION" ~= "3." ]]; then
 		git checkout rttweak
-	elif [[ "XENOMAI_VERSION" ~= "2.6." ]]; then
+	elif [[ "$XENOMAI_VERSION" ~= "2.6." ]]; then
 		git checkout qt5
 	fi
 	apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
