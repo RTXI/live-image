@@ -287,6 +287,51 @@ sed -i 's/PUBLICSHARE/#PUBLICSHARE/g' /etc/xdg/user-dirs.defaults
 sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 
 ###############################################################################
+# Install zsh and some zsh plugins. 
+###############################################################################
+
+apt-get -y install zsh zsh-syntax-highlighting zsh-antigen
+
+###############################################################################
+# Install some GTK and icon themes. 
+###############################################################################
+
+cd ~/
+apt-get -y install libgtk-3-dev ruby-bundler ruby-sass npm nodejs inkscape
+ln -s /usr/bin/nodejs /usr/bin/node
+npm -g install gulp grunt-cli bower
+
+# Install Arc GTK theme.
+git clone https://github.com/horst3180/arc-theme
+cd arc-theme
+./autogen.sh --prefix=/usr && make && make install
+
+# Install Numix icon themes. 
+git clone https://github.com/numixproject/numix-icon-theme
+git clone https://github.com/numixproject/numix-icon-theme-circle
+git clone https://github.com/numixproject/numix-folders
+cp -r numix-icon-theme/Numix /usr/share/icons/
+cp -r numix-icon-theme-circle/Numix-Circle /usr/share/icons/
+cd numix-folders
+sed -i "s/chown/#chown/g" numix-folders
+# style=6; custom; primary=3FD59F; secondary=2EAF81; tertiary=2E3436 
+echo "style=6; custom; primary=3FD59F; secondary=2EAF81; tertiary=2E3436" 
+./numix-folders -t
+
+# Override GNOME defaults. 
+GLIB_OVERRIDE="/usr/share/glib-2.0/schemas/20_ubuntu-gnome-default-settings.gschema.override"
+sed -i 's/^icon-theme="Adwaita"/icon-theme="Numix-Circle"/g' $GLIB_OVERRIDE
+sed -i 's/^gtk-theme="Adwaita"/gtk-theme="Arc"/g' $GLIB_OVERRIDE
+sed -i 's/^theme="Adwaita"/theme="Arc"/g' $GLIB_OVERRIDE
+glib-compile-schemas /usr/share/glib-2.0/schemas/
+
+# Cleanup
+cd ~/
+rm -rf arc-theme
+rm -rf numix-folders
+rm -rf numix-icon-theme
+
+###############################################################################
 # Cleanup and exit chroot.
 ###############################################################################
 
