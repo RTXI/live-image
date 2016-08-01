@@ -80,6 +80,10 @@ apt-get -y install git
 git clone https://github.com/rtxi/rtxi
 cd rtxi
 
+# set Qt style to gtk
+awk '/.*QApplication \*app = new QApplication\(argc,argv\);.*/ { print; print "    app->setStyle\(\"gtk\"\);"; next }1' src/main.cpp
+
+
 if [ "$RTXI_VERSION" == "2.1" ]; then
 	if test `echo "$XENOMAI_VERSION" | grep -c "3."` -ne 0; then
 		git checkout rttweak
