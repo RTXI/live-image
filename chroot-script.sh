@@ -46,6 +46,7 @@ fi
 
 cd $HOME
 
+# Locations for compiling RTXI source code
 BASE=$HOME/rtxi
 SCRIPTS=$BASE/scripts
 DEPS=$BASE/deps
@@ -53,6 +54,10 @@ HDF=$DEPS/hdf
 QWT=$DEPS/qwt
 DYN=$DEPS/dynamo
 INCLUDES=$DEPS/rtxi_includes
+
+# Installation locations for RTXI
+RTXI_INCLUDES=/usr/local/lib/rtxi_includes
+RTXI_MODULES=$RTXI_MODULES
 
 ###############################################################################
 # Enable deb-src and the universe/multiverse repositories. 
@@ -167,11 +172,9 @@ ldconfig
 ###############################################################################
 
 rsync -a $DEPS/rtxi_includes /usr/local/lib/.
-find $BASE/plugins/. -name "*.h" -exec cp -t /usr/local/lib/rtxi_includes/ {} +
+find $BASE/plugins/. -name "*.h" -exec cp -t $RTXI_INCLUDES/ {} +
 
-chown -R root.adm /usr/local/lib/rtxi_includes
-chmod g+s /usr/local/lib/rtxi_includes
-chmod -R g+w /usr/local/lib/rtxi_includes
+setfacl -Rm g:adm:rwX,d:g:adm:rwX $RTXI_INCLUDES
 
 ###############################################################################
 # Install RT kernel (from the deb files you provided)
@@ -237,32 +240,15 @@ update-rc.d rtxi_load_analogy defaults
 ldconfig
 
 ###############################################################################
-# Create shared RTXI folder in /home/RTXI. All users can add and edit files 
-# here, and a process in /etc/profile.d/ will create a symlink to /home/RTXI in
-# all users' home directories. 
+# Create a shared folder and install some modules in it. 
 ###############################################################################
 
-# Edit permissions to make the directory accessible to all users in adm
-mkdir /home/RTXI
-chown root.adm /home/RTXI
-chmod g+s /home/RTXI
-chmod -R g+w /home/RTXI
-
-# Create shared folders
-cd /home/RTXI/
-git clone https://github.com/rtxi/rtxi.git
-mkdir modules
-
-chown -R root.adm /home/RTXI/rtxi
-chmod g+s /home/RTXI/rtxi
-chmod -R g+w /home/RTXI/rtxi
-chown -R root.adm modules
-chmod g+s modules
-chmod -R g+w modules
+mkdir $RTXI_MODULES
+setfacl -Rm g:adm:rwX,d:g:adm:rwX $RTXI_MODULES
 
 # Clone and install some modules
-mkdir /usr/local/lib/rtxi_modules
-cd /usr/local/lib/rtxi_modules
+mkdir $RTXI_MODULES
+cd $RTXI_MODULES
 git clone https://github.com/RTXI/iir-filter.git
 git clone https://github.com/RTXI/fir-window.git
 git clone https://github.com/RTXI/sync.git
@@ -283,13 +269,6 @@ for dir in *; do
 	fi
 done
 
-# Create file in /etc/profile.d/ that will make the RTXI symlink at login
-echo 'if [ -d /home/RTXI ]; then
-	if ! [ -d $HOME/RTXI ]; then
-		ln -s /home/RTXI $HOME/RTXI
-	fi
-fi' > /etc/profile.d/create_rtxi_symlink.sh
-
 # Disable the Public and Templates directories from being formed
 sed -i 's/PUBLICSHARE/#PUBLICSHARE/g' /etc/xdg/user-dirs.defaults
 sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
@@ -297,6 +276,7 @@ sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 ###############################################################################
 # Cleanup and exit chroot.
 ###############################################################################
+
 cd ~/
 rm -r rtxi
 if [ "$RTXI_VERSION" == "2.0" ]; then rm -r handy-scripts; fi
