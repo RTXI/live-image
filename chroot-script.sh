@@ -36,9 +36,9 @@ export LC_ALL=C
 RTXI_VERSION=2.1
 XENOMAI_VERSION=3.0.2
 KERNEL_VERSION=4.1.18
-if [ "$RTXI_VERSION" == "2.1" ]; then
+if [ "$RTXI_VERSION" = "2.1" ]; then
 	QWT_VERSION=6.1.2 
-elif [ "$RTXI_VERSION" == "2.0" ]; then
+elif [ "$RTXI_VERSION" = "2.0" ]; then
 	QWT_VERSION=6.1.0 
 fi
 
@@ -67,9 +67,10 @@ apt-get update
 apt-get -y install git
 
 # check whether to build v2.0 or v2.1. 
+git clone https://github.com/rtxi/rtxi
+cd rtxi
+
 if [ "$RTXI_VERSION" == "2.1" ]; then
-	git clone https://github.com/rtxi/rtxi
-	cd rtxi
 	if [[ "XENOMAI_VERSION" ~= "3." ]]; then
 		git checkout rttweak
 	elif [[ "XENOMAI_VERSION" ~= "2.6." ]]; then
@@ -83,7 +84,7 @@ if [ "$RTXI_VERSION" == "2.1" ]; then
 	                   libqt5xml5 libqt5network5 qtbase5-dev qt5-default \
 	                   libgles2-mesa-dev gdebi libqt5designer5 qttools5-dev \
 	                   libqt5designercomponents5 qttools5-dev-tools \
-	                   libgit2-dev libmarkdown2-dev
+	                   libgit2-dev libmarkdown2-dev 
 elif [ "$RTXI_VERSION" == "2.0" ]; then
 	git clone https://github.com/rtxi/rtxi
 	git clone https://github.com/anselg/handy-scripts
