@@ -235,8 +235,16 @@ chmod +x /usr/share/applications/rtxi.desktop
 cp -f rtxi.conf /etc/rtxi.conf
 cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
-cp -f scripts/services/rtxi_load_analogy /etc/init.d/
-update-rc.d rtxi_load_analogy defaults
+if [ $(lsb_release -sc) == "xenial" ]; then
+   echo "----->Load analogy driver with systemd"
+   sudo cp -f scripts/services/rtxi_load_analogy.service /etc/systemd/system/
+   sudo systemctl enable rtxi_load_analogy.service
+else
+   echo "----->Load analogy driver with sysvinit/upstart"
+   sudo cp -f scripts/services/rtxi_load_analogy /etc/init.d/
+   sudo update-rc.d rtxi_load_analogy defaults
+fi
+
 ldconfig
 
 ###############################################################################
