@@ -57,15 +57,15 @@ INCLUDES=$DEPS/rtxi_includes
 ###############################################################################
 # Enable deb-src and the universe/multiverse repositories. 
 ###############################################################################
-add-apt-repository -s "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
 
+add-apt-repository -s "deb http://archive.ubuntu.com/ubuntu $(lsb_release -sc) main universe restricted multiverse"
 
 ###############################################################################
 # Install package dependencies. (DO NOT UPGRADE EXISTING PACKAGES!)
 ###############################################################################
 
 apt-get update
-# apt-get -y upgrade <- this has been problematic
+# apt-get -y upgrade <- this has created unbootable live CDs before. 
 apt-get -y install git
 
 # check whether to build v2.0 or v2.1. 
