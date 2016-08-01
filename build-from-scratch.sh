@@ -106,7 +106,8 @@ sudo cp $ROOT/chroot-script.sh edit/
 # CHROOT! 
 ###############################################################################
 
-sudo chroot edit ./chroot-script.sh
+sudo chroot edit ./chroot-script.sh $RTXI_VERSION $XENOMAI_VERSION \
+	$KERNEL_VERSION $UBUNTU_VERSION $UBUNTU_FLAVOR
 
 ###############################################################################
 # Exit chroot and clean up a bit. 

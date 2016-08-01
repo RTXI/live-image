@@ -35,9 +35,12 @@ export LC_ALL=C
 # Set global variables. 
 ###############################################################################
 
-RTXI_VERSION=2.1
-XENOMAI_VERSION=3.0.2
-KERNEL_VERSION=4.1.18
+RTXI_VERSION="$1"
+XENOMAI_VERSION="$2"
+KERNEL_VERSION="$3"
+UBUNTU_VERSION="$4"
+UBUNTU_FLAVOR="$5"
+
 if [ "$RTXI_VERSION" = "2.1" ]; then
 	QWT_VERSION=6.1.2 
 elif [ "$RTXI_VERSION" = "2.0" ]; then
