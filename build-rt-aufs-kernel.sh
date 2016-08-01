@@ -36,7 +36,9 @@ SCRIPT_DIR=$(pwd)
 
 LINUX_VERSION=4.1.18
 LINUX_TREE=$BASE/linux-$LINUX_VERSION
-LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_amd64.deb"
+
+ARCH=i386
+LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_$ARCH.deb"
 
 XENOMAI_VERSION=3.0.2
 XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
@@ -157,9 +159,9 @@ fi
 echo  "----->Patching xenomai onto kernel"
 cd $LINUX_TREE
 if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
-	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/ksrc/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-?.patch --linux=$LINUX_TREE
+	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/ksrc/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-[0-9]*.patch --linux=$LINUX_TREE
 elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
-	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/kernel/cobalt/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-?.patch --linux=$LINUX_TREE
+	$XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/kernel/cobalt/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-[0-9]*.patch --linux=$LINUX_TREE
 else
 	echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
 	exit 1
