@@ -60,7 +60,7 @@ INCLUDES=$DEPS/rtxi_includes
 
 # Installation locations for RTXI
 RTXI_INCLUDES=/usr/local/lib/rtxi_includes
-RTXI_MODULES=$RTXI_MODULES
+RTXI_MODULES=/usr/local/lib/rtxi_modules
 
 ###############################################################################
 # Enable deb-src and the universe/multiverse repositories. 
@@ -81,9 +81,9 @@ git clone https://github.com/rtxi/rtxi
 cd rtxi
 
 if [ "$RTXI_VERSION" == "2.1" ]; then
-	if [[ "$XENOMAI_VERSION" ~= "3." ]]; then
+	if test `echo "$XENOMAI_VERSION" | grep -c "3."` -ne 0; then
 		git checkout rttweak
-	elif [[ "$XENOMAI_VERSION" ~= "2.6." ]]; then
+	elif test `echo "$XENOMAI_VERSION" | grep -c "2.6."` -ne 0; then
 		git checkout qt5
 	fi
 	apt-get -y install autotools-dev automake libtool kernel-package gcc g++ \
@@ -239,11 +239,9 @@ cp -f rtxi.conf /etc/rtxi.conf
 cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
 
 if [ $(lsb_release -sc) == "xenial" ]; then
-   echo "----->Load analogy driver with systemd"
    sudo cp -f scripts/services/rtxi_load_analogy.service /etc/systemd/system/
    sudo systemctl enable rtxi_load_analogy.service
 else
-   echo "----->Load analogy driver with sysvinit/upstart"
    sudo cp -f scripts/services/rtxi_load_analogy /etc/init.d/
    sudo update-rc.d rtxi_load_analogy defaults
 fi
