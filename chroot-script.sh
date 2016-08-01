@@ -104,8 +104,7 @@ elif [ "$RTXI_VERSION" == "2.0" ]; then
 	                   kernel-wedge git-core libncurses5 libncurses5-dev \
 	                   libelf-dev binutils-dev libgsl0-dev vim stress lshw \
 	                   libboost-dev qt4-dev-tools libqt4-dev libqt4-opengl-dev \
-	                   gdebi r-base r-cran-ggplot2 r-cran-reshape2 r-cran-hdf5 \
-	                   r-cran-plyr r-cran-scales
+	                   gdebi 
 else 
 	echo "Invalid RTXI version set"
 	exit
@@ -122,10 +121,15 @@ apt-get -y build-dep linux
 # break. 
 ###############################################################################
 
-if [ "$RTXI_VERSION" == "2.0" ]; then
-	cd $DEPS
-	wget https://cran.r-project.org/src/contrib/Archive/gridExtra/gridExtra_0.9.1.tar.gz
-	R CMD INSTALL gridExtra_0.9.1.tar.gz
+apt-get -y install r-base r-cran-ggplot2 r-cran-reshape2 r-cran-plyr \
+   r-cran-reshape2 r-cran-scales
+
+if [ "$RTXI_VERSION" == "2.1" ]; then
+   apt-get -y install r-cran-gridextra
+elif [ "$RTXI_VERSION" == "2.0" ]; then
+   cd $DEPS
+   wget https://cran.r-project.org/src/contrib/Archive/gridExtra/gridExtra_0.9.1.tar.gz
+   R CMD INSTALL gridExtra_0.9.1.tar.gz
 fi
 
 ###############################################################################
