@@ -59,9 +59,9 @@ directory and then compile the kernel.  It *will not* actually install the
 kernel. The kernel configurations to tweak are the same as they are for default
 (non-Aufs) kernels, with the exception: 
 
-- Filesystems
-  - Miscellaneous filesystems
-    - Aufs (enable as module) 
+--> Filesystems
+  --> Miscellaneous filesystems
+    --> Aufs (enable as module) 
 
 Once the kernel is built, it will be copied to the `deb_files` folder. 
 
