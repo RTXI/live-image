@@ -1,5 +1,4 @@
 #! /bin/bash
-
 set -e
 
 ################################################################################
@@ -36,16 +35,25 @@ echo  "----->Setting up variables"
 BASE=/opt
 SCRIPT_DIR=$(pwd)
 
-LINUX_VERSION=4.1.18
+ARCH=amd64
+
+LINUX_VERSION=3.8.13
 LINUX_TREE=$BASE/linux-$LINUX_VERSION
 
-ARCH=i386
-LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_$ARCH.deb"
+# Hard-code some kernel config urls
+LINUX_CONFIG_URL=""
+if [ $LINUX_VERSION = "4.1.18" ]; then
+	LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_$ARCH.deb"
+elif [ $LINUX_VERSION = "3.18.20" ]; then
+	LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.18.20-vivid/linux-image-3.18.20-031820-generic_3.18.20-031820.201508081633_$ARCH.deb"
+elif [ $LINUX_VERSION = "3.8.13" ]; then
+	LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.8.13.28-raring/linux-image-3.8.13-03081328-generic_3.8.13-03081328.201409030938_$ARCH.deb"
+fi
 
-XENOMAI_VERSION=3.0.2
+XENOMAI_VERSION=2.6.4
 XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
 
-AUFS_VERSION=4.1
+AUFS_VERSION=${LINUX_KERNEL%.*}
 AUFS_ROOT=$BASE/aufs-$AUFS_VERSION
 
 BUILD_ROOT=$BASE/build
@@ -55,6 +63,7 @@ DEB_FILES=$SCRIPT_DIR/deb_files
 rm -rf $BUILD_ROOT
 rm -rf $LINUX_TREE
 rm -rf $XENOMAI_ROOT
+rm -rf $AUFS_ROOT
 mkdir $BUILD_ROOT
 
 if [ $? -eq 0 ]; then
@@ -110,7 +119,9 @@ if [ "$LINUX_CONFIG_URL" != "" ]; then
 		cp /boot/config-$(uname -r) $LINUX_TREE/.config 
 	fi
 else
-	cp /boot/config-$(uname -r) $LINUX_TREE/.config 
+	#cp /boot/config-$(uname -r) $LINUX_TREE/.config 
+   cd $LINUX_TREE
+   make defconfig
 fi
 
 
@@ -211,7 +222,7 @@ cp $BASE/linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
 # command and let the code below run. 
 ################################################################################
 
-exit 0  # Delete this line to continue. 
+exit
 
 echo  "----->Installing compiled kernel"
 cd $BASE
