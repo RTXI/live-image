@@ -237,8 +237,6 @@ else
 	exit
 fi
 
-exit
-
 # Install Xenomai libraries. 
 echo  "----->Installing user libraries"
 cd $BUILD_ROOT
