@@ -5,3 +5,4 @@ chroot-images
 image-chroots
 image_chroots
 *.deb
+deb_files/
