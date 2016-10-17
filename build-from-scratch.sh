@@ -1,24 +1,24 @@
 #! /bin/bash
-
-set -e
+set -eu
 
 ################################################################################
 # The Real-Time eXperiment Interface (RTXI)
-# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill 
+#
+# Copyright (C) 2011 Georgia Institute of Technology, University of Utah, Weill
 # Cornell Medical College
 #
-# This program is free software: you can redistribute it and/or modify it under 
-# the terms of the GNU General Public License as published by the Free Software 
-# Foundation, either version 3 of the License, or (at your option) any later 
+# This program is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
 # version.
 #
-# This program is distributed in the hope that it will be useful, but WITHOUT 
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
-# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the GNU General Public License along with 
-# this program.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with
+# this program. If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 
 echo "Building Ubuntu Live CD from scratch."
@@ -35,15 +35,15 @@ sudo apt-get -y install genisoimage squashfs-tools syslinux
 #
 # NOTES: 
 #  * UBUNTU_VERSION only works with the most recent LTS release, so the script 
-#    can break when a new version comes out unless the variable is updated. 
+#    can break when a new version comes out unless the variable is updated.
 #  * the options for UBUNTU_VERSION are: ubuntu, lubuntu, kubuntu, ubuntukylin 
 #    ubuntu-core (probably won't work), ubuntu-gnome, and xubuntu.
 ###############################################################################
 
-RTXI_VERSION=2.0
+RTXI_VERSION=2.1
 XENOMAI_VERSION=2.6.4
 KERNEL_VERSION=3.8.13
-UBUNTU_VERSION=14.04.4 # keep this updated!
+UBUNTU_VERSION=14.04.5 # keep this updated!
 UBUNTU_FLAVOR=ubuntu-gnome
 
 ROOT=$(pwd)
@@ -60,15 +60,15 @@ mkdir ${BUILD}
 cd ${BUILD}
 
 if [ "$UBUNTU_FLAVOR" = "ubuntu" ]; then
-	wget http://releases.ubuntu.com/$UBUNTU_VERSION/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
+  wget http://releases.ubuntu.com/$UBUNTU_VERSION/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 else
-	wget http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/$UBUNTU_VERSION/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
+  wget http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/$UBUNTU_VERSION/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 fi
 
 EXIT_STATUS=$?
 if [ $EXIT_STATUS != 0 ]; then 
-	echo "Live CD Download failed... exiting"
-	exit $EXIT_STATUS 
+  echo "Live CD Download failed... exiting"
+  exit $EXIT_STATUS 
 fi
 
 # Get started and extract the iso
@@ -86,9 +86,9 @@ sudo umount mnt/
 # Copy over the network configuration file. It's in different places in 
 # different distros.
 if [ $(lsb_release -is) == "Debian" ]; then
-	sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf
+  sudo cp /etc/resolv.conf edit/run/resolvconf/resolv.conf
 elif [ $(lsb_release -is) == "Ubuntu" ]; then
-	sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
+  sudo cp /run/resolvconf/resolv.conf edit/run/resolvconf/resolv.conf
 fi
 
 # Copy pre-compiled RT kernel deb files from the deb_files/ folder
@@ -107,7 +107,7 @@ sudo cp $ROOT/chroot-script.sh edit/
 ###############################################################################
 
 sudo chroot edit ./chroot-script.sh $RTXI_VERSION $XENOMAI_VERSION \
-	$KERNEL_VERSION $UBUNTU_VERSION $UBUNTU_FLAVOR
+  $KERNEL_VERSION $UBUNTU_VERSION $UBUNTU_FLAVOR
 
 ###############################################################################
 # Exit chroot and clean up a bit. 
@@ -125,9 +125,9 @@ sudo rm edit/chroot-script.sh
 
 sudo bash -c "chroot edit dpkg-query -W > extract/casper/filesystem.manifest"
 if [ "$ARCH" = "amd64" ]; then
-	sudo cp edit/boot/vmlinuz-$KERNEL_VERSION-xenomai-$XENOMAI_VERSION-aufs extract/casper/vmlinuz.efi
+  sudo cp edit/boot/vmlinuz-$KERNEL_VERSION-xenomai-$XENOMAI_VERSION-aufs extract/casper/vmlinuz.efi
 else
-	sudo cp edit/boot/vmlinuz-$KERNEL_VERSION-xenomai-$XENOMAI_VERSION-aufs extract/casper/vmlinuz
+  sudo cp edit/boot/vmlinuz-$KERNEL_VERSION-xenomai-$XENOMAI_VERSION-aufs extract/casper/vmlinuz
 fi
 sudo cp edit/boot/initrd.img-$KERNEL_VERSION-xenomai-$XENOMAI_VERSION-aufs extract/casper/initrd.lz
 sudo mksquashfs edit extract/casper/filesystem.squashfs -comp xz
@@ -140,7 +140,9 @@ sudo bash -c "find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boo
 # Create a new hybrid *.iso and make it bootable from USB (thanks to syslinux)
 ###############################################################################
 
-sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o ../rtxi-$RTXI_VERSION-$UBUNTU_FLAVOR-$UBUNTU_VERSION-$ARCH.iso . 
+sudo genisoimage -D -r -V "RTXI" -cache-inodes -J -l -b isolinux/isolinux.bin \
+  -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table \
+  -o ../rtxi-$RTXI_VERSION-$UBUNTU_FLAVOR-$UBUNTU_VERSION-$ARCH.iso . 
 sudo isohybrid ../rtxi-$RTXI_VERSION-$UBUNTU_FLAVOR-$UBUNTU_VERSION-$ARCH.iso
 
 echo "Done."
