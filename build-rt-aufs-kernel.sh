@@ -27,7 +27,16 @@ fi
 
 
 ################################################################################
-# Export environment variables. The kernel will be downloaded and built in BASE. 
+# Set base variables. 
+################################################################################
+
+ARCH=amd64
+LINUX_VERSION=3.8.13
+XENOMAI_VERSION=2.6.4
+
+
+################################################################################
+# Calculate other variables. 
 ################################################################################
 
 echo  "----->Setting up variables"
@@ -35,9 +44,6 @@ echo  "----->Setting up variables"
 BASE=/opt
 SCRIPT_DIR=$(pwd)
 
-ARCH=amd64
-
-LINUX_VERSION=3.8.13
 LINUX_TREE=$BASE/linux-$LINUX_VERSION
 
 # Hard-code some kernel config urls
@@ -50,7 +56,6 @@ elif [ $LINUX_VERSION = "3.8.13" ]; then
 	LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.8.13.28-raring/linux-image-3.8.13-03081328-generic_3.8.13-03081328.201409030938_$ARCH.deb"
 fi
 
-XENOMAI_VERSION=2.6.4
 XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
 
 AUFS_VERSION=${LINUX_KERNEL%.*}
