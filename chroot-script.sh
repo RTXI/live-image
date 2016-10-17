@@ -305,42 +305,34 @@ apt-get -y install libgtk-3-dev
 GLIB_OVERRIDE="/usr/share/glib-2.0/schemas/20_ubuntu-gnome-default-settings.gschema.override"
 
 if test `echo "$UBUNTU_VERSION" | grep -c "16.04"` -ne 0; then
-  #apt-get -y install libgtk-3-dev ruby-bundler ruby-sass npm nodejs inkscape
-  #ln -s /usr/bin/nodejs /usr/bin/node
-  #npm -g install gulp grunt-cli bower
+  apt-get -y install libgtk-3-dev ruby-bundler ruby-sass npm nodejs
+  ln -s /usr/bin/nodejs /usr/bin/node
+  npm -g install gulp grunt-cli bower
 
   # Install Arc GTK theme.
   git clone https://github.com/horst3180/arc-theme
   cd arc-theme
-  ./autogen.sh --prefix=/usr && make && make install
+  ./autogen.sh --prefix=/usr && gulp && make && make install
   cd ../
   rm -rf arc-theme
 
-  # Install Adapta GTK theme. (needs inkscape)
-  #git clone https://github.com/tista500/Adapta
-  #cd Adapta
-  #./autogen.sh --prefix=/usr && make && make install
-  #cd ../
-  #rm -rf Adapta
-
   # Install Numix icons. 
-  #git clone https://github.com/numixproject/numix-icon-theme
-  #git clone https://github.com/numixproject/numix-icon-theme-circle
+  git clone https://github.com/numixproject/numix-icon-theme
+  git clone https://github.com/numixproject/numix-icon-theme-circle
   #git clone https://github.com/numixproject/numix-folders
-  #cp -r numix-icon-theme/Numix /usr/share/icons/
-  #cp -r numix-icon-theme-circle/Numix-Circle /usr/share/icons/
+  cp -r numix-icon-theme/Numix /usr/share/icons/
+  cp -r numix-icon-theme-circle/Numix-Circle /usr/share/icons/
   #cd numix-folders
   #sed -i "s/chown/#chown/g" numix-folders
   # style=6; custom; primary=3FD59F; secondary=2EAF81; tertiary=2E3436 
   #echo "style=6; custom; primary=3FD59F; secondary=2EAF81; tertiary=2E3436" 
   #./numix-folders -t
   #rm -rf numix-folders
-  #rm -rf numix-icon-theme
-  #rm -rf numix-circle-icon-theme
+  rm -rf numix-icon-theme
+  rm -rf numix-circle-icon-theme
 	
   # Override GNOME defaults. 
-  #sed -i 's/^icon-theme="Adwaita"/icon-theme="Numix-Circle"/g' $GLIB_OVERRIDE
-  sed -i 's/^icon-theme="Adwaita"/icon-theme="Paper"/g' $GLIB_OVERRIDE
+  sed -i 's/^icon-theme="Adwaita"/icon-theme="Numix-Circle"/g' $GLIB_OVERRIDE
   sed -i 's/^gtk-theme="Adwaita"/gtk-theme="Arc"/g' $GLIB_OVERRIDE
   sed -i 's/^theme="Adwaita"/theme="Arc"/g' $GLIB_OVERRIDE
   glib-compile-schemas /usr/share/glib-2.0/schemas/
@@ -348,9 +340,17 @@ if test `echo "$UBUNTU_VERSION" | grep -c "16.04"` -ne 0; then
 elif test `echo "$UBUNTU_VERSION" | grep -c "14.04"` -ne 0; then
   # Install theme pack that includes Numix
   apt-get -y install shimmer-themes
+
+  # Install Numix icons. 
+  git clone https://github.com/numixproject/numix-icon-theme
+  git clone https://github.com/numixproject/numix-icon-theme-circle
+  cp -r numix-icon-theme/Numix /usr/share/icons/
+  cp -r numix-icon-theme-circle/Numix-Circle /usr/share/icons/
+  rm -rf numix-icon-theme
+  rm -rf numix-circle-icon-theme
 	
   # Override GNOME defaults. 
-  sed -i 's/^icon-theme="Adwaita"/icon-theme="Paper"/g' $GLIB_OVERRIDE
+  sed -i 's/^icon-theme="Adwaita"/icon-theme="Numix-Circle"/g' $GLIB_OVERRIDE
   sed -i 's/^gtk-theme="Adwaita"/gtk-theme="Numix"/g' $GLIB_OVERRIDE
   sed -i 's/^theme="Adwaita"/theme="Numix"/g' $GLIB_OVERRIDE
   glib-compile-schemas /usr/share/glib-2.0/schemas/
