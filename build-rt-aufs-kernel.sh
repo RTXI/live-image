@@ -101,7 +101,7 @@ fi
 echo  "----->Downloading Linux kernel"
 cd $BASE
 if ! [ -f "linux-$LINUX_VERSION.tar.xz" ]; then
-  wget https://www.kernel.org/pub/linux/kernel/v${LINUX_VERSION%.*.*}.x/linux-$LINUX_VERSION.tar.xz
+  wget https://www.kernel.org/pub/linux/kernel/v${LINUX_VERSION%%.*}.x/linux-$LINUX_VERSION.tar.xz
 fi
 tar xf linux-$LINUX_VERSION.tar.xz
 
@@ -206,7 +206,11 @@ fi
 echo  "----->Compiling kernel"
 cd $LINUX_TREE
 export CONCURRENCY_LEVEL=$(nproc)
-fakeroot make-kpkg --initrd --append-to-version=-xenomai-$XENOMAI_VERSION-aufs --revision $(date +%Y%m%d) kernel-image kernel-headers modules
+fakeroot make-kpkg \
+  --initrd \
+  --append-to-version=-xenomai-$XENOMAI_VERSION-aufs \
+  --revision $(date +%Y%m%d) \
+  kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
   echo  "----->Kernel compilation complete."
@@ -255,9 +259,17 @@ fi
 echo  "----->Installing user libraries"
 cd $BUILD_ROOT
 if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
-  $XENOMAI_ROOT/configure --enable-shared --enable-smp --enable-x86-sep
+  $XENOMAI_ROOT/configure \
+    --enable-shared \
+    --enable-smp \
+    --enable-x86-sep
 elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
-  $XENOMAI_ROOT/configure --with-core=cobalt --enable-pshared --enable-smp --enable-x86-vsyscall --enable-dlopen-libs
+  $XENOMAI_ROOT/configure \
+    --with-core=cobalt \
+    --enable-pshared \
+    --enable-smp \
+    --enable-x86-vsyscall \
+    --enable-dlopen-libs
 else
   echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
   exit 1
