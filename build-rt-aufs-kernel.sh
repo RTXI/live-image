@@ -120,7 +120,9 @@ fi
 
 # Download kernel config
 if [ "$LINUX_CONFIG_URL" != "" ]; then
-  wget $LINUX_CONFIG_URL
+  if ! [ -f ${LINUX_CONFIG_URL##*/} ]; then
+    wget $LINUX_CONFIG_URL
+  fi
   if [ $? -eq 0 ]; then
     dpkg-deb -x ${LINUX_CONFIG_URL##*/} linux-$LINUX_VERSION-image
     cp linux-$LINUX_VERSION-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
