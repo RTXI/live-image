@@ -219,8 +219,8 @@ else
   exit
 fi
 
-cp $BASE/linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
-cp $BASE/linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
+cp $BASE/linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION*.deb $DEB_FILES
+cp $BASE/linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION*.deb $DEB_FILES
 
 
 ################################################################################
