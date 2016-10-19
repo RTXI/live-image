@@ -29,6 +29,20 @@ fi
 
 ################################################################################
 # Set base variables. 
+#
+# ARCH can be either amd64 or i386. 
+# 
+# The choice of XENOMAI_VERSION determines the available LINUX_VERSION options: 
+#
+#   Xenomai |            Linux 
+#    2.6.2  |  3.2.21   3.4.6    3.5.3   
+#    2.6.3  |  3.4.6    3.5.7    3.8.13  
+#    2.6.4  |  3.8.13   3.10.32  3.14.17 
+#    2.6.5  |  3.10.32  3.14.44  3.18.20 
+#    3.0.1  |  3.10.32  3.14.39  3.18.20 
+#    3.0.2  |  3.10.32  3.14.44  3.18.20  4.1.18 
+#    3.0.3  |  3.10.32  3.14.44  3.18.20  4.1.18 
+# 
 ################################################################################
 
 ARCH=amd64
@@ -59,7 +73,7 @@ fi
 
 XENOMAI_ROOT=$BASE/xenomai-$XENOMAI_VERSION
 
-AUFS_VERSION=${LINUX_KERNEL%.*}
+AUFS_VERSION=${LINUX_VERSION%.*}
 AUFS_ROOT=$BASE/aufs-$AUFS_VERSION
 
 BUILD_ROOT=$BASE/build
@@ -86,17 +100,8 @@ fi
 
 echo  "----->Downloading Linux kernel"
 cd $BASE
-if [[ "$LINUX_VERSION" =~ "3." ]]; then 
-  if ! [ -f "linux-$LINUX_VERSION.tar.xz" ]; then
-    wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-$LINUX_VERSION.tar.xz
-  fi
-elif [[ "$LINUX_VERSION" =~ "4." ]]; then
-  if ! [ -f "linux-$LINUX_VERSION.tar.xz" ]; then
-    wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$LINUX_VERSION.tar.xz
-  fi
-else
-  echo "Kernel specified in the \$LINUX_VERSION variable needs to be 3.x or 4.x"
-  exit 1
+if ! [ -f "linux-$LINUX_VERSION.tar.xz" ]; then
+  wget https://www.kernel.org/pub/linux/kernel/v${LINUX_VERSION%%.*}.x/linux-$LINUX_VERSION.tar.xz
 fi
 tar xf linux-$LINUX_VERSION.tar.xz
 
@@ -115,7 +120,9 @@ fi
 
 # Download kernel config
 if [ "$LINUX_CONFIG_URL" != "" ]; then
-  wget $LINUX_CONFIG_URL
+  if ! [ -f ${LINUX_CONFIG_URL##*/} ]; then
+    wget $LINUX_CONFIG_URL
+  fi
   if [ $? -eq 0 ]; then
     dpkg-deb -x ${LINUX_CONFIG_URL##*/} linux-$LINUX_VERSION-image
     cp linux-$LINUX_VERSION-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
@@ -140,34 +147,24 @@ echo  "----->Patching aufs kernel"
 cd $BASE
 if [[ "$AUFS_VERSION" =~ "3." ]]; then 
   git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs-$AUFS_VERSION
-  cd $AUFS_ROOT
-  git checkout origin/aufs$AUFS_VERSION
-  cd $LINUX_TREE
-  patch -p1 < $AUFS_ROOT/aufs3-kbuild.patch && \
-  patch -p1 < $AUFS_ROOT/aufs3-base.patch && \
-  patch -p1 < $AUFS_ROOT/aufs3-mmap.patch && \
-  patch -p1 < $AUFS_ROOT/aufs3-standalone.patch
-  cp -r $AUFS_ROOT/Documentation $LINUX_TREE
-  cp -r $AUFS_ROOT/fs $LINUX_TREE
-  cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
-  cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 elif [[ "$AUFS_VERSION" =~ "4." ]]; then
   git clone git://github.com/sfjro/aufs4-standalone.git aufs-$AUFS_VERSION
-  cd $AUFS_ROOT
-  git checkout origin/aufs$AUFS_VERSION
-  cd $LINUX_TREE
-  patch -p1 < $AUFS_ROOT/aufs4-kbuild.patch && \
-  patch -p1 < $AUFS_ROOT/aufs4-base.patch && \
-  patch -p1 < $AUFS_ROOT/aufs4-mmap.patch && \
-  patch -p1 < $AUFS_ROOT/aufs4-standalone.patch
-  cp -r $AUFS_ROOT/Documentation $LINUX_TREE
-  cp -r $AUFS_ROOT/fs $LINUX_TREE
-  cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
-  cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 else
   echo "Aufs version specified in the \$AUFS_VERSION variable needs to be 3.x or 4.x"
   exit 1
 fi
+
+cd $AUFS_ROOT
+git checkout origin/aufs$AUFS_VERSION
+cd $LINUX_TREE
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-kbuild.patch && \
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-base.patch && \
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-mmap.patch && \
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-standalone.patch
+cp -r $AUFS_ROOT/Documentation $LINUX_TREE
+cp -r $AUFS_ROOT/fs $LINUX_TREE
+cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
+cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 
 
 ################################################################################
@@ -209,7 +206,11 @@ fi
 echo  "----->Compiling kernel"
 cd $LINUX_TREE
 export CONCURRENCY_LEVEL=$(nproc)
-fakeroot make-kpkg --initrd --append-to-version=-xenomai-$XENOMAI_VERSION-aufs --revision $(date +%Y%m%d) kernel-image kernel-headers modules
+fakeroot make-kpkg \
+  --initrd \
+  --append-to-version=-xenomai-$XENOMAI_VERSION-aufs \
+  --revision $(date +%Y%m%d) \
+  kernel-image kernel-headers modules
 
 if [ $? -eq 0 ]; then
   echo  "----->Kernel compilation complete."
@@ -218,8 +219,8 @@ else
   exit
 fi
 
-cp $BASE/linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
-cp $BASE/linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION_*.deb $DEB_FILES
+cp $BASE/linux-image-$LINUX_VERSION-xenomai-$XENOMAI_VERSION*.deb $DEB_FILES
+cp $BASE/linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION*.deb $DEB_FILES
 
 
 ################################################################################
@@ -258,9 +259,17 @@ fi
 echo  "----->Installing user libraries"
 cd $BUILD_ROOT
 if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
-  $XENOMAI_ROOT/configure --enable-shared --enable-smp --enable-x86-sep
+  $XENOMAI_ROOT/configure \
+    --enable-shared \
+    --enable-smp \
+    --enable-x86-sep
 elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
-  $XENOMAI_ROOT/configure --with-core=cobalt --enable-pshared --enable-smp --enable-x86-vsyscall --enable-dlopen-libs
+  $XENOMAI_ROOT/configure \
+    --with-core=cobalt \
+    --enable-pshared \
+    --enable-smp \
+    --enable-x86-vsyscall \
+    --enable-dlopen-libs
 else
   echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
   exit 1
