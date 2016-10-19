@@ -86,17 +86,8 @@ fi
 
 echo  "----->Downloading Linux kernel"
 cd $BASE
-if [[ "$LINUX_VERSION" =~ "3." ]]; then 
-  if ! [ -f "linux-$LINUX_VERSION.tar.xz" ]; then
-    wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-$LINUX_VERSION.tar.xz
-  fi
-elif [[ "$LINUX_VERSION" =~ "4." ]]; then
-  if ! [ -f "linux-$LINUX_VERSION.tar.xz" ]; then
-    wget https://www.kernel.org/pub/linux/kernel/v4.x/linux-$LINUX_VERSION.tar.xz
-  fi
-else
-  echo "Kernel specified in the \$LINUX_VERSION variable needs to be 3.x or 4.x"
-  exit 1
+if ! [ -f "linux-$LINUX_VERSION.tar.xz" ]; then
+  wget https://www.kernel.org/pub/linux/kernel/v${LINUX_VERSION%.*.*}.x/linux-$LINUX_VERSION.tar.xz
 fi
 tar xf linux-$LINUX_VERSION.tar.xz
 
@@ -140,34 +131,24 @@ echo  "----->Patching aufs kernel"
 cd $BASE
 if [[ "$AUFS_VERSION" =~ "3." ]]; then 
   git clone git://git.code.sf.net/p/aufs/aufs3-standalone aufs-$AUFS_VERSION
-  cd $AUFS_ROOT
-  git checkout origin/aufs$AUFS_VERSION
-  cd $LINUX_TREE
-  patch -p1 < $AUFS_ROOT/aufs3-kbuild.patch && \
-  patch -p1 < $AUFS_ROOT/aufs3-base.patch && \
-  patch -p1 < $AUFS_ROOT/aufs3-mmap.patch && \
-  patch -p1 < $AUFS_ROOT/aufs3-standalone.patch
-  cp -r $AUFS_ROOT/Documentation $LINUX_TREE
-  cp -r $AUFS_ROOT/fs $LINUX_TREE
-  cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
-  cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 elif [[ "$AUFS_VERSION" =~ "4." ]]; then
   git clone git://github.com/sfjro/aufs4-standalone.git aufs-$AUFS_VERSION
-  cd $AUFS_ROOT
-  git checkout origin/aufs$AUFS_VERSION
-  cd $LINUX_TREE
-  patch -p1 < $AUFS_ROOT/aufs4-kbuild.patch && \
-  patch -p1 < $AUFS_ROOT/aufs4-base.patch && \
-  patch -p1 < $AUFS_ROOT/aufs4-mmap.patch && \
-  patch -p1 < $AUFS_ROOT/aufs4-standalone.patch
-  cp -r $AUFS_ROOT/Documentation $LINUX_TREE
-  cp -r $AUFS_ROOT/fs $LINUX_TREE
-  cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
-  cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 else
   echo "Aufs version specified in the \$AUFS_VERSION variable needs to be 3.x or 4.x"
   exit 1
 fi
+
+cd $AUFS_ROOT
+git checkout origin/aufs$AUFS_VERSION
+cd $LINUX_TREE
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-kbuild.patch && \
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-base.patch && \
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-mmap.patch && \
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-standalone.patch
+cp -r $AUFS_ROOT/Documentation $LINUX_TREE
+cp -r $AUFS_ROOT/fs $LINUX_TREE
+cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/uapi/linux/
+cp $AUFS_ROOT/include/uapi/linux/aufs_type.h $LINUX_TREE/include/linux/
 
 
 ################################################################################
