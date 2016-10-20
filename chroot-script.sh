@@ -249,11 +249,11 @@ fi
 # Add rule to load analogy driver at boot with systemd (xenial) or sysvinit 
 # (trusty). 
 if [ $(lsb_release -sc) == "xenial" ]; then
-  sudo cp -f scripts/services/rtxi_load_analogy.service /etc/systemd/system/
-  sudo systemctl enable rtxi_load_analogy.service
+  cp -f scripts/services/rtxi_load_analogy.service /etc/systemd/system/
+  systemctl enable rtxi_load_analogy.service
 else
-  sudo cp -f scripts/services/rtxi_load_analogy /etc/init.d/
-  sudo update-rc.d rtxi_load_analogy defaults
+  cp -f scripts/services/rtxi_load_analogy /etc/init.d/
+  update-rc.d rtxi_load_analogy defaults
 fi
 
 ldconfig
