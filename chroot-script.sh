@@ -86,10 +86,10 @@ apt-get -y install git
 
 # check whether to build v2.0 or v2.1. 
 git clone https://github.com/rtxi/rtxi
-cd rtxi
 
 if [ "$RTXI_VERSION" == "2.1" ]; then
-  if test `echo "$XENOMAI_VERSION" | grep -c "3."` -ne 0; then
+  cd rtxi
+  if test `echo "$XENOMAI_VERSION" | grep -c "^3."` -ne 0; then
     git checkout rttweak
   fi
   apt-get -y install \
@@ -101,6 +101,8 @@ if [ "$RTXI_VERSION" == "2.1" ]; then
     libqt5designer5 qttools5-dev libqt5designercomponents5 qttools5-dev-tools \
     libgit2-dev libmarkdown2-dev
 elif [ "$RTXI_VERSION" == "2.0" ]; then
+  git clone https://github.com/anselg/handy-scripts
+  cd rtxi
   git checkout v2.0-xenomai-2.6.4 
   apt-get -y install \
     autotools-dev automake libtool kernel-package g++ gcc gdb fakeroot crash \
@@ -196,12 +198,17 @@ tar xf xenomai-$XENOMAI_VERSION.tar.bz2
 
 mkdir build
 cd build
-if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then
+if [[ "$XENOMAI_VERSION" =~ "^2.6" ]]; then
   ../xenomai-$XENOMAI_VERSION/configure \
-    --enable-shared --enable-smp --enable-x86-sep
-elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
+    --enable-shared \
+    --enable-smp \
+    --enable-x86-sep
+elif [[ "$XENOMAI_VERSION" =~ "^3." ]]; then
   ../xenomai-$XENOMAI_VERSION/configure \
-    --with-core=cobalt --enable-pshared --enable-smp --enable-x86-vsyscall \
+    --with-core=cobalt \
+    --enable-pshared \
+    --enable-smp \
+    --enable-x86-vsyscall \
     --enable-dlopen-libs
 else
   echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
@@ -219,10 +226,8 @@ cd $BASE
 
 # Theming for Qt4 (v2.0 only)
 if [ "$RTXI_VERSION" == "2.0" ]; then
-  cp ../handy-scripts/rtxi_utils/ui-tweaks/main.cpp src/main.cpp
-  cp ../handy-scripts/rtxi_utils/ui-tweaks/default_gui_model.cpp src/default_gui_model.cpp
-  if [ ! -d /root/.config ]; then mkdir /root/.config; fi
-  cp -f scripts/icons/Trolltech.conf /root/.config/ 
+  cp ../handy-scripts/ui_tweaks/main.cpp src/main.cpp
+  cp ../handy-scripts/ui_tweaks/default_gui_model.cpp src/default_gui_model.cpp
 fi
 
 ./autogen.sh
@@ -294,7 +299,7 @@ sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 
 cd ~/
 rm -r rtxi
-if [ "$RTXI_VERSION" == "2.0" ]; then rm -r handy-scripts; fi
+if [ "$RTXI_VERSION" == "2.0" ]; then rm -rf handy-scripts; fi
 rm -r *.deb
 echo "" > /run/resolvconf/resolv.conf
 apt-get clean
