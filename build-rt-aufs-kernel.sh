@@ -238,8 +238,8 @@ exit
 
 echo  "----->Installing compiled kernel"
 cd $BASE
-dpkg -i linux-image-${LINUX_VERSION}-xenomai-${XENOMAI_VERSION}_*.deb
-dpkg -i linux-headers-${LINUX_VERSION}-xenomai-${XENOMAI_VERSION}_*.deb
+dpkg -i linux-image-${LINUX_VERSION}-xenomai-$XENOMAI_VERSION*_$ARCH.deb
+dpkg -i linux-headers-${LINUX_VERSION}-xenomai-$XENOMAI_VERSION*_$ARCH.deb
 
 if [ $? -eq 0 ]; then
   echo  "----->Kernel installation complete"
