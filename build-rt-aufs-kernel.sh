@@ -162,9 +162,9 @@ if [ $LINUX_VERSION = 3.14.44 ]; then
   git checkout origin/aufs3.14.40+
 fi
 cd $LINUX_TREE
-patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-kbuild.patch && \
-patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-base.patch && \
-patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-mmap.patch && \
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-kbuild.patch
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-base.patch
+patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-mmap.patch
 patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-standalone.patch
 cp -r $AUFS_ROOT/Documentation $LINUX_TREE
 cp -r $AUFS_ROOT/fs $LINUX_TREE
