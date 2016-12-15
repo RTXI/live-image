@@ -109,7 +109,7 @@ tar xf linux-$LINUX_VERSION.tar.xz
 
 echo  "----->Downloading Xenomai"
 if ! [ -f "xenomai-$XENOMAI_VERSION.tar.bz2" ]; then
-  wget https://xenomai.org/downloads/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
+  wget http://xenomai.org/downloads/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
 fi
 tar xf xenomai-$XENOMAI_VERSION.tar.bz2
 
