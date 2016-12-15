@@ -69,6 +69,8 @@ elif [ $LINUX_VERSION = "3.18.20" ]; then
   LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.18.20-vivid/linux-image-3.18.20-031820-generic_3.18.20-031820.201508081633_$ARCH.deb"
 elif [ $LINUX_VERSION = "3.14.44" ]; then
   LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.14.44-utopic/linux-image-3.14.44-031444-generic_3.14.44-031444.201506061305_$ARCH.deb"
+elif [ $LINUX_VERSION = "3.10.32" ]; then
+  LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.10.32-saucy/linux-image-3.10.32-031032-generic_3.10.32-031032.201402221635_$ARCH.deb"
 elif [ $LINUX_VERSION = "3.8.13" ]; then
   LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.8.13.28-raring/linux-image-3.8.13-03081328-generic_3.8.13-03081328.201409030938_$ARCH.deb"
 fi
@@ -160,6 +162,8 @@ cd $AUFS_ROOT
 git checkout origin/aufs$AUFS_VERSION
 if [ $LINUX_VERSION = 3.14.44 ]; then
   git checkout origin/aufs3.14.40+
+elif [ $LINUX_VERSION = 3.10.32 ]; then
+  git checkout origin/aufs3.10.x
 fi
 cd $LINUX_TREE
 patch -p1 < $AUFS_ROOT/aufs${AUFS_VERSION%.*}-kbuild.patch
@@ -211,6 +215,8 @@ fi
 echo  "----->Compiling kernel"
 cd $LINUX_TREE
 export CONCURRENCY_LEVEL=$(nproc)
+export CC=gcc-4.9
+export CXX=gcc-4.9
 fakeroot make-kpkg \
   --initrd \
   --append-to-version=-xenomai-$XENOMAI_VERSION-aufs \
