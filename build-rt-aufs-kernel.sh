@@ -215,8 +215,6 @@ fi
 echo  "----->Compiling kernel"
 cd $LINUX_TREE
 export CONCURRENCY_LEVEL=$(nproc)
-export CC=gcc-4.9
-export CXX=gcc-4.9
 fakeroot make-kpkg \
   --initrd \
   --append-to-version=-xenomai-$XENOMAI_VERSION-aufs \
