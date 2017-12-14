@@ -90,7 +90,7 @@ git clone https://github.com/rtxi/rtxi
 if [ "$RTXI_VERSION" == "2.1" ]; then
   cd rtxi
   if test `echo "$XENOMAI_VERSION" | grep -c "^3."` -ne 0; then
-    git checkout rttweak
+    git checkout master
   fi
   apt-get -y install \
     autotools-dev automake libtool kernel-package gcc g++ gdb fakeroot crash \
@@ -99,7 +99,7 @@ if [ "$RTXI_VERSION" == "2.1" ]; then
     libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
     libqt5network5 qtbase5-dev qt5-default libgles2-mesa-dev gdebi \
     libqt5designer5 qttools5-dev libqt5designercomponents5 qttools5-dev-tools \
-    libgit2-dev libmarkdown2-dev
+    libgit2-dev libmarkdown2-dev pkg-config
 elif [ "$RTXI_VERSION" == "2.0" ]; then
   git clone https://github.com/anselg/handy-scripts
   cd rtxi
@@ -147,12 +147,12 @@ fi
 ###############################################################################
 
 echo "----->Checking for HDF5"
-cd $HDF
-tar xf hdf5-$HDF_VERSION.tar.bz2
-cd hdf5-$HDF_VERSION
-./configure --prefix=/usr
-make -sj`nproc`
-make install
+#cd $HDF
+#tar xf hdf5-$HDF_VERSION.tar.bz2
+#cd hdf5-$HDF_VERSION
+#./configure --prefix=/usr
+#make -sj`nproc`
+#make install
 
 ###############################################################################
 # Install Qwt
@@ -165,8 +165,8 @@ cd qwt-$QWT_VERSION
 qmake qwt.pro
 make -sj`nproc`
 make install
-cp -vf /usr/local/qwt-$QWT_VERSION/lib/libqwt.so.$QWT_VERSION /usr/lib/.
-ln -sf /usr/lib/libqwt.so.$QWT_VERSION /usr/lib/libqwt.so
+#cp -vf /usr/local/qwt-$QWT_VERSION/lib/libqwt.so.$QWT_VERSION /usr/lib/.
+#ln -sf /usr/lib/libqwt.so.$QWT_VERSION /usr/lib/libqwt.so
 ldconfig
 
 ###############################################################################
@@ -198,22 +198,22 @@ tar xf xenomai-$XENOMAI_VERSION.tar.bz2
 
 mkdir build
 cd build
-if [[ "$XENOMAI_VERSION" =~ "^2.6" ]]; then
-  ../xenomai-$XENOMAI_VERSION/configure \
-    --enable-shared \
-    --enable-smp \
-    --enable-x86-sep
-elif [[ "$XENOMAI_VERSION" =~ "^3." ]]; then
+#if [[ "$XENOMAI_VERSION" =~ "^2.6" ]]; then
+#  ../xenomai-$XENOMAI_VERSION/configure \
+#    --enable-shared \
+#    --enable-smp \
+#    --enable-x86-sep
+#elif [[ "$XENOMAI_VERSION" =~ "^3." ]]; then
   ../xenomai-$XENOMAI_VERSION/configure \
     --with-core=cobalt \
     --enable-pshared \
     --enable-smp \
     --enable-x86-vsyscall \
     --enable-dlopen-libs
-else
-  echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
-  exit 1
-fi
+#else
+#  echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
+#  exit 1
+#fi
 
 make -s
 make install

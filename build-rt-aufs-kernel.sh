@@ -46,9 +46,8 @@ fi
 ################################################################################
 
 ARCH=amd64
-LINUX_VERSION=3.8.13
-XENOMAI_VERSION=2.6.4
-
+LINUX_VERSION=4.9.51
+XENOMAI_VERSION=3.0.5
 
 ################################################################################
 # Calculate other variables. 
@@ -63,7 +62,9 @@ LINUX_TREE=$BASE/linux-$LINUX_VERSION
 
 # Hard-code some kernel config urls
 LINUX_CONFIG_URL=""
-if [ $LINUX_VERSION = "4.1.18" ]; then
+if [ $LINUX_VERSION = "4.9.51" ]; then
+  LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.9.51/linux-headers-4.9.51-040951-generic_4.9.51-040951.201709200331_$ARCH.deb"
+elif [ $LINUX_VERSION = "4.1.18" ]; then
   LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v4.1.18-wily/linux-image-4.1.18-040118-generic_4.1.18-040118.201602160131_$ARCH.deb"
 elif [ $LINUX_VERSION = "3.18.20" ]; then
   LINUX_CONFIG_URL="http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.18.20-vivid/linux-image-3.18.20-031820-generic_3.18.20-031820.201508081633_$ARCH.deb"
@@ -110,10 +111,15 @@ fi
 tar xf linux-$LINUX_VERSION.tar.xz
 
 echo  "----->Downloading Xenomai"
+cd $BASE
 if ! [ -f "xenomai-$XENOMAI_VERSION.tar.bz2" ]; then
   wget http://xenomai.org/downloads/xenomai/stable/xenomai-$XENOMAI_VERSION.tar.bz2
 fi
 tar xf xenomai-$XENOMAI_VERSION.tar.bz2
+
+echo  "----->Downloading ipipe"
+cd $BASE
+wget http://xenomai.org/downloads/ipipe/v4.x/x86/ipipe-core-4.9.51-x86-4.patch
 
 if [ $? -eq 0 ]; then
   echo  "----->Downloads complete"
@@ -128,9 +134,9 @@ if [ "$LINUX_CONFIG_URL" != "" ]; then
     wget $LINUX_CONFIG_URL
   fi
   if [ $? -eq 0 ]; then
-    dpkg-deb -x ${LINUX_CONFIG_URL##*/} linux-$LINUX_VERSION-image
-    cp linux-$LINUX_VERSION-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
-  else
+    #dpkg-deb -x ${LINUX_CONFIG_URL##*/} linux-$LINUX_VERSION-image
+    #cp linux-$LINUX_VERSION-image/boot/config-$LINUX_VERSION-* $LINUX_TREE/.config
+  #else
     echo "wget failed to get $LINUX_CONFIG_URL"
     echo "  defaulting to /boot/config-$(uname -r)"
     cp /boot/config-$(uname -r) $LINUX_TREE/.config 
@@ -186,7 +192,7 @@ cd $LINUX_TREE
 if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
   $XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/ksrc/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-[0-9]*.patch --linux=$LINUX_TREE
 elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
-  $XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --adeos=$XENOMAI_ROOT/kernel/cobalt/arch/x86/patches/ipipe-core-$LINUX_VERSION-x86-[0-9]*.patch --linux=$LINUX_TREE
+  $XENOMAI_ROOT/scripts/prepare-kernel.sh --arch=x86 --ipipe=$BASE/ipipe-core-$LINUX_VERSION-x86-[0-9]*.patch --linux=$LINUX_TREE
 else
   echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
   exit 1

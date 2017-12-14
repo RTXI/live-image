@@ -41,9 +41,9 @@ sudo apt-get -y install genisoimage squashfs-tools syslinux
 ###############################################################################
 
 RTXI_VERSION=2.1
-XENOMAI_VERSION=2.6.4
-KERNEL_VERSION=3.8.13
-UBUNTU_VERSION=14.04.5 # keep this updated!
+XENOMAI_VERSION=3.0.5
+KERNEL_VERSION=4.9.51
+UBUNTU_VERSION=16.04.3 # keep this updated!
 UBUNTU_FLAVOR=ubuntu-gnome
 
 ROOT=$(pwd)
