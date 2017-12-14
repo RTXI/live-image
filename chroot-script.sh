@@ -99,7 +99,7 @@ if [ "$RTXI_VERSION" == "2.1" ]; then
     libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
     libqt5network5 qtbase5-dev qt5-default libgles2-mesa-dev gdebi \
     libqt5designer5 qttools5-dev libqt5designercomponents5 qttools5-dev-tools \
-    libgit2-dev libmarkdown2-dev pkg-config
+    libgit2-dev libmarkdown2-dev pkg-config libhdf5-dev cmake crash kexec-tools 
 elif [ "$RTXI_VERSION" == "2.0" ]; then
   git clone https://github.com/anselg/handy-scripts
   cd rtxi
