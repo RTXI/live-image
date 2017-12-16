@@ -41,7 +41,7 @@ KERNEL_VERSION="$3"
 UBUNTU_VERSION="$4"
 UBUNTU_FLAVOR="$5"
 
-if [ "$RTXI_VERSION" = "2.1" ]; then
+if [ "$RTXI_VERSION" = "2.2" ]; then
   QWT_VERSION=6.1.3
 elif [ "$RTXI_VERSION" = "2.0" ]; then
   QWT_VERSION=6.1.0
@@ -55,8 +55,9 @@ cd $HOME
 BASE=$HOME/rtxi
 SCRIPTS=$BASE/scripts
 DEPS=$BASE/deps
-if [ "$RTXI_VERSION" = "2.1" ]; then
+if [ "$RTXI_VERSION" = "2.2" ]; then
   HDF=$DEPS
+  GIT=$DEPS
   QWT=$DEPS
 elif [ "$RTXI_VERSION" = "2.0" ]; then
   HDF=$DEPS/hdf
@@ -87,7 +88,7 @@ apt-get -y install git
 # check whether to build v2.0 or v2.1. 
 git clone https://github.com/rtxi/rtxi
 
-if [ "$RTXI_VERSION" == "2.1" ]; then
+if [ "$RTXI_VERSION" == "2.2" ]; then
   cd rtxi
   if test `echo "$XENOMAI_VERSION" | grep -c "^3."` -ne 0; then
     git checkout master
@@ -99,7 +100,8 @@ if [ "$RTXI_VERSION" == "2.1" ]; then
     libqt5svg5-dev libqt5opengl5 libqt5gui5 libqt5core5a libqt5xml5 \
     libqt5network5 qtbase5-dev qt5-default libgles2-mesa-dev gdebi \
     libqt5designer5 qttools5-dev libqt5designercomponents5 qttools5-dev-tools \
-    libgit2-dev libmarkdown2-dev pkg-config libhdf5-dev cmake crash kexec-tools 
+    libgit2-dev libmarkdown2-dev pkg-config libhdf5-dev cmake crash kexec-tools \
+    syslinux-utils libssl-dev
 elif [ "$RTXI_VERSION" == "2.0" ]; then
   git clone https://github.com/anselg/handy-scripts
   cd rtxi
@@ -146,13 +148,35 @@ fi
 # Install HDF5
 ###############################################################################
 
+if [ "$RTXI_VERSION" == "2.0" ]; then
 echo "----->Checking for HDF5"
-#cd $HDF
-#tar xf hdf5-$HDF_VERSION.tar.bz2
-#cd hdf5-$HDF_VERSION
-#./configure --prefix=/usr
-#make -sj`nproc`
-#make install
+cd $HDF
+tar xf hdf5-$HDF_VERSION.tar.bz2
+cd hdf5-$HDF_VERSION
+./configure --prefix=/usr
+make -sj`nproc`
+make install
+fi
+
+###############################################################################
+# Install libgit2
+###############################################################################
+
+echo "-----> Installing libgit2..."
+cd $GIT
+#if [ ! -d "libgit2" ]; then
+	git clone https://github.com/libgit2/libgit2.git && cd libgit2
+	mkdir build && cd build
+	cmake .. -DCURL=OFF
+	cmake --build . --target install
+	ldconfig
+#else
+#	cd libgit2
+#	rm -rf build && mkdir build && cd build
+#	cmake .. -DCURL=OFF
+#	cmake --build . --target install
+#	ldconfig
+#fi
 
 ###############################################################################
 # Install Qwt
@@ -266,9 +290,8 @@ mkdir $RTXI_MODULES
 setfacl -Rm g:adm:rwX,d:g:adm:rwX $RTXI_MODULES
 
 # Clone and install some modules
-mkdir $RTXI_MODULES
+#mkdir $RTXI_MODULES
 cd $RTXI_MODULES
-git clone https://github.com/RTXI/analysis-tools.git
 git clone https://github.com/RTXI/iir-filter.git
 git clone https://github.com/RTXI/fir-window.git
 git clone https://github.com/RTXI/sync.git
@@ -288,6 +311,9 @@ for dir in *; do
     cd ../
   fi
 done
+
+cd $RTXI_MODULES
+git clone https://github.com/RTXI/analysis-tools.git
 
 # Disable the Public and Templates directories from being formed
 sed -i 's/PUBLICSHARE/#PUBLICSHARE/g' /etc/xdg/user-dirs.defaults

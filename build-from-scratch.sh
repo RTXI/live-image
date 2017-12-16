@@ -28,7 +28,7 @@ echo "Building Ubuntu Live CD from scratch."
 ###############################################################################
 
 echo "Checking for dependencies..."
-sudo apt-get -y install genisoimage squashfs-tools syslinux
+sudo apt-get -y install genisoimage squashfs-tools syslinux syslinux-utils
 
 ###############################################################################
 # Global variables go here. 
@@ -40,7 +40,7 @@ sudo apt-get -y install genisoimage squashfs-tools syslinux
 #    ubuntu-core (probably won't work), ubuntu-gnome, and xubuntu.
 ###############################################################################
 
-RTXI_VERSION=2.1
+RTXI_VERSION=2.2
 XENOMAI_VERSION=3.0.5
 KERNEL_VERSION=4.9.51
 UBUNTU_VERSION=16.04.3 # keep this updated!
@@ -62,7 +62,7 @@ cd ${BUILD}
 if [ "$UBUNTU_FLAVOR" = "ubuntu" ]; then
   wget http://releases.ubuntu.com/$UBUNTU_VERSION/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 else
-  wget http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/$UBUNTU_VERSION/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
+	wget http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/$UBUNTU_VERSION/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 fi
 
 EXIT_STATUS=$?
