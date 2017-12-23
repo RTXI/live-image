@@ -104,5 +104,4 @@ To clone to a USB within Linux, use `dd`:
 $ sudo dd if=the-new-live-cd.iso of=/dev/your_device bs=1M && sync
 ```
 
-If done from another OS, don't use UNetbootin. It rarely works, and it'll
-probably save you time to not bother with it.  
+If done from another OS, try using UNetbootin.
