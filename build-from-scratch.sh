@@ -44,7 +44,7 @@ RTXI_VERSION=2.2
 XENOMAI_VERSION=3.0.5
 KERNEL_VERSION=4.9.51
 UBUNTU_VERSION=16.04.3 # keep this updated!
-UBUNTU_FLAVOR=ubuntu-gnome
+UBUNTU_FLAVOR=ubuntu
 
 ROOT=$(pwd)
 BUILD=build_$(date +%F_%T)

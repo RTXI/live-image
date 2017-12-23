@@ -26,7 +26,6 @@ if ! id | grep -q root; then
   exit
 fi
 
-
 ################################################################################
 # Set base variables. 
 #
@@ -52,6 +51,11 @@ XENOMAI_VERSION=3.0.5
 ################################################################################
 # Calculate other variables. 
 ################################################################################
+
+echo  "----->Checking dependencies"
+apt-get update
+apt-get upgrade
+apt-get install git libncurses5-dev kernel-package libssl-dev
 
 echo  "----->Setting up variables"
 

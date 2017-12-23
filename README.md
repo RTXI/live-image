@@ -1,10 +1,6 @@
 # Live Image
 
-Contained here are the secrets to spinning out an RTXI live CD. In future, this
-README will contain instructions for:  
- - [x] Building the live CD from scratch.  
- - [ ] Updating a downloaded CD.  
- - [ ] Editing an already-extracted live CD's chroot filesystem.  
+Contained here are the secrets to spinning out an RTXI live CD.
 
 ## Building from scratch.  
 To build from scratch, you will need two things:  
