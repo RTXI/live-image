@@ -85,7 +85,7 @@ apt-get update
 # apt-get -y upgrade <- this has created unbootable live CDs before. 
 apt-get -y install git
 
-# check whether to build v2.0 or v2.1. 
+# Get latest source
 git clone https://github.com/rtxi/rtxi
 
 if [ "$RTXI_VERSION" == "2.2" ]; then
@@ -116,46 +116,19 @@ else
   echo "Invalid RTXI version set"
   exit 1
 fi
-  
-###############################################################################
-# Install gridExtra for v2.0 (it'll get its own deb package in 16.04). Be 
-# careful about version numbers. If gridExtra package updates, this link might 
-# break. 
-###############################################################################
-
-if [ "$RTXI_VERSION" == "2.0" ]; then
-  cd $DEPS
-  wget https://cran.r-project.org/src/contrib/Archive/gridExtra/gridExtra_0.9.1.tar.gz
-  R CMD INSTALL gridExtra_0.9.1.tar.gz
-fi
-
-###############################################################################
-# Install dynamo for v2.0
-###############################################################################
-
-if [ "$RTXI_VERSION" == "2.0" ]; then
-  echo "Installing DYNAMO utility..."
-  apt-get -y install mlton
-  
-  cd $DYN
-  mllex dl.lex
-  mlyacc dl.grm
-  mlton dynamo.mlb
-  cp dynamo /usr/bin/
-fi
 
 ###############################################################################
 # Install HDF5
 ###############################################################################
 
 if [ "$RTXI_VERSION" == "2.0" ]; then
-echo "----->Checking for HDF5"
-cd $HDF
-tar xf hdf5-$HDF_VERSION.tar.bz2
-cd hdf5-$HDF_VERSION
-./configure --prefix=/usr
-make -sj`nproc`
-make install
+  echo "----->Checking for HDF5"
+  cd $HDF
+  tar xf hdf5-$HDF_VERSION.tar.bz2
+  cd hdf5-$HDF_VERSION
+  ./configure --prefix=/usr
+  make -sj`nproc`
+  make install
 fi
 
 ###############################################################################
@@ -164,19 +137,11 @@ fi
 
 echo "-----> Installing libgit2..."
 cd $GIT
-#if [ ! -d "libgit2" ]; then
-	git clone https://github.com/libgit2/libgit2.git && cd libgit2
-	mkdir build && cd build
-	cmake .. -DCURL=OFF
-	cmake --build . --target install
-	ldconfig
-#else
-#	cd libgit2
-#	rm -rf build && mkdir build && cd build
-#	cmake .. -DCURL=OFF
-#	cmake --build . --target install
-#	ldconfig
-#fi
+git clone https://github.com/libgit2/libgit2.git && cd libgit2
+mkdir build && cd build
+cmake .. -DCURL=OFF
+cmake --build . --target install
+ldconfig
 
 ###############################################################################
 # Install Qwt
@@ -222,23 +187,12 @@ tar xf xenomai-$XENOMAI_VERSION.tar.bz2
 
 mkdir build
 cd build
-#if [[ "$XENOMAI_VERSION" =~ "^2.6" ]]; then
-#  ../xenomai-$XENOMAI_VERSION/configure \
-#    --enable-shared \
-#    --enable-smp \
-#    --enable-x86-sep
-#elif [[ "$XENOMAI_VERSION" =~ "^3." ]]; then
-  ../xenomai-$XENOMAI_VERSION/configure \
-    --with-core=cobalt \
-    --enable-pshared \
-    --enable-smp \
-    --enable-x86-vsyscall \
-    --enable-dlopen-libs
-#else
-#  echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
-#  exit 1
-#fi
-
+../xenomai-$XENOMAI_VERSION/configure \
+	--with-core=cobalt \
+	--enable-pshared \
+	--enable-smp \
+	--enable-x86-vsyscall \
+	--enable-dlopen-libs
 make -s
 make install
 
@@ -248,27 +202,21 @@ make install
 
 cd $BASE
 
-# Theming for Qt4 (v2.0 only)
-if [ "$RTXI_VERSION" == "2.0" ]; then
-  cp ../handy-scripts/ui_tweaks/main.cpp src/main.cpp
-  cp ../handy-scripts/ui_tweaks/default_gui_model.cpp src/default_gui_model.cpp
-fi
-
 ./autogen.sh
 ./configure --enable-xenomai --enable-analogy 
 make -sj`nproc` -C ./
 make install -C ./
 
 # For v2.0, put all the icons, config files, etc. into place manually.
-if [ "$RTXI_VERSION" == "2.0" ]; then
+#if [ "$RTXI_VERSION" == "2.0" ]; then
   cp -f libtool /usr/local/lib/rtxi/
-  cp -f scripts/icons/RTXI-icon.png /usr/local/lib/rtxi/
-  cp -f scripts/icons/RTXI-widget-icon.png /usr/local/lib/rtxi/
-  cp -f scripts/rtxi.desktop /usr/share/applications/
+  cp -f res/icons/RTXI-icon.png /usr/local/lib/rtxi/
+  cp -f res/icons/RTXI-widget-icon.png /usr/local/lib/rtxi/
+  cp -f res/rtxi.desktop /usr/share/applications/
   chmod +x /usr/share/applications/rtxi.desktop
   cp -f rtxi.conf /etc/rtxi.conf
   cp -f /usr/xenomai/sbin/analogy_config /usr/sbin/
-fi
+#fi
 
 # Add rule to load analogy driver at boot with systemd (xenial) or sysvinit 
 # (trusty). 
@@ -324,8 +272,8 @@ sed -i 's/TEMPLATE/#TEMPLATE/g' /etc/xdg/user-dirs.defaults
 ###############################################################################
 
 cd ~/
-rm -r rtxi
-if [ "$RTXI_VERSION" == "2.0" ]; then rm -rf handy-scripts; fi
+#rm -r rtxi
+#if [ "$RTXI_VERSION" == "2.0" ]; then rm -rf handy-scripts; fi
 rm -r *.deb
 echo "" > /run/resolvconf/resolv.conf
 apt-get clean
