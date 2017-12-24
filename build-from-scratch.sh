@@ -62,7 +62,7 @@ cd ${BUILD}
 if [ "$UBUNTU_FLAVOR" = "ubuntu" ]; then
   wget http://releases.ubuntu.com/$UBUNTU_VERSION/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 else
-	wget http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/$UBUNTU_VERSION/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
+  wget http://cdimage.ubuntu.com/$UBUNTU_FLAVOR/releases/$UBUNTU_VERSION/release/$UBUNTU_FLAVOR-$UBUNTU_VERSION-desktop-$ARCH.iso
 fi
 
 EXIT_STATUS=$?

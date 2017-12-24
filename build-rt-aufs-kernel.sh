@@ -22,7 +22,7 @@ set -eu
 ################################################################################
 
 if ! id | grep -q root; then
-  echo "Must run script as root; try again with sudo ./install_rt_kernel.sh"
+  echo "Must run script as root; try again with sudo"
   exit
 fi
 
@@ -248,7 +248,7 @@ cp $BASE/linux-headers-$LINUX_VERSION-xenomai-$XENOMAI_VERSION*.deb $DEB_FILES
 # command and let the code below run. 
 ################################################################################
 
-exit
+#exit
 
 echo  "----->Installing compiled kernel"
 cd $BASE
@@ -277,22 +277,22 @@ fi
 # Install Xenomai libraries. 
 echo  "----->Installing user libraries"
 cd $BUILD_ROOT
-if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
-  $XENOMAI_ROOT/configure \
-    --enable-shared \
-    --enable-smp \
-    --enable-x86-sep
-elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
+#if [[ "$XENOMAI_VERSION" =~ "2.6" ]]; then 
+#  $XENOMAI_ROOT/configure \
+#    --enable-shared \
+#    --enable-smp \
+#    --enable-x86-sep
+#elif [[ "$XENOMAI_VERSION" =~ "3." ]]; then
   $XENOMAI_ROOT/configure \
     --with-core=cobalt \
     --enable-pshared \
     --enable-smp \
     --enable-x86-vsyscall \
     --enable-dlopen-libs
-else
-  echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
-  exit 1
-fi
+#else
+#  echo "Xenomai version specified in the \$XENOMAI_VERSION variable needs to be 2.6.x or 3.x"
+#  exit 1
+#fi
 make -s
 make install
 
